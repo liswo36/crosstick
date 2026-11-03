@@ -431,7 +431,7 @@ body.shoot:not(.score-on) .stage { inset: 16px 16px 90px; }
             <tr><td data-i="r0">0文字（右端に寄せます）</td><td class="neg" data-i="v0">−3点</td></tr>
           </tbody>
         </table>
-        <p data-i="rulesNote">総合スコアは、取りうる点数の幅の中での位置です。最低点（どの銘柄も重ならない）を0、上限点（ほかの銘柄にも出てくる文字がすべて重なる）を100として換算するので、銘柄数が多くても有利・不利になりにくい仕組みです。</p>
+        <p data-i="rulesNote">総合スコアは、取りうる点数の幅の中での位置です。最低点（どの銘柄も重ならない）を0、上限点（ほかの銘柄にも出てくる文字がすべて重なる）を100として換算するので、銘柄数が多くても有利・不利になりにくい仕組みです。ほかの銘柄と共通する文字が1つもない銘柄は、組み合わせられないので、満点を取れなかったものとして数え、総合スコアが下がります。</p>
         <h3 data-i="privacyH">プライバシー</h3>
         <p class="privacy" data-i="privacy">このサイトは、入力した銘柄コードや結果を集めたり、送ったりしません。処理はすべてお使いの端末の中で行い、入力した銘柄コードだけ、次に開いたときのためにこのブラウザに保存します（入力欄を空にすると消えます）。なお、ページを開くときはGoogle Fontsからフォントを読み込み、配信にはCloudflareを使っています。そのためIPアドレスなどの通信情報はGoogleとCloudflareに届き、Cloudflareにはアクセスの記録が残ることがあります。</p>
         
@@ -762,7 +762,9 @@ function tryBuild(words, rng, clean) {
 function pointsFor(o) { return o === 0 ? -3 : o * (o + 1) / 2; }
 
 // 銘柄セットごとの点数の幅。下限は「全銘柄が重ならない」、上限は「ほかの銘柄にも使われている文字が全部重なる」場合。
-// 銘柄数が多いほど有利にならないよう、総合スコアはこの幅の中での位置（0〜100）で出す
+// 銘柄数が多いほど有利にならないよう、総合スコアはこの幅の中での位置（0〜100）で出す。
+// ただし、ほかの銘柄と共通する文字が1つもない銘柄（組み合わせられない銘柄）は、上限でも満点を取れたものとして数える。
+// そのため、そうした銘柄が混ざっているセットは、総合スコアが下がる。
 function scoreRange(words) {
   var ub = 0;
   words.forEach(function(w, i) {
@@ -771,9 +773,9 @@ function scoreRange(words) {
       var ch = w[k];
       if (words.some(function(x, j){ return j !== i && x.indexOf(ch) >= 0; })) o++;
     }
-    ub += pointsFor(o);
+    ub += o === 0 ? pointsFor(w.length) : pointsFor(o);
   });
-  return { min: -3 * words.length, ub: ub };
+  return { min: pointsFor(0) * words.length, ub: ub };
 }
 
 function buildLayout(words, pattern, clean) {
@@ -816,7 +818,7 @@ var I18N = {
     thTicker: '銘柄ごとの点数（ほかの銘柄と重なる文字の数）', thPts: '点数',
     r3: '3文字すべて', v6: '+6点', r2: '2文字', v3: '+3点', r1: '1文字', v1: '+1点',
     r0: '0文字（右端に寄せます）', v0: '−3点',
-    rulesNote: '総合スコアは、取りうる点数の幅の中での位置です。最低点（どの銘柄も重ならない）を0、上限点（ほかの銘柄にも出てくる文字がすべて重なる）を100として換算するので、銘柄数が多くても有利・不利になりにくい仕組みです。',
+    rulesNote: '総合スコアは、取りうる点数の幅の中での位置です。最低点（どの銘柄も重ならない）を0、上限点（ほかの銘柄にも出てくる文字がすべて重なる）を100として換算するので、銘柄数が多くても有利・不利になりにくい仕組みです。ほかの銘柄と共通する文字が1つもない銘柄は、組み合わせられないので、満点を取れなかったものとして数え、総合スコアが下がります。',
     privacyH: 'プライバシー',
     privacy: 'このサイトは、入力した銘柄コードや結果を集めたり、送ったりしません。処理はすべてお使いの端末の中で行い、入力した銘柄コードだけ、次に開いたときのためにこのブラウザに保存します（入力欄を空にすると消えます）。なお、ページを開くときはGoogle Fontsからフォントを読み込み、配信にはCloudflareを使っています。そのためIPアドレスなどの通信情報はGoogleとCloudflareに届き、Cloudflareにはアクセスの記録が残ることがあります。',
     terms: '利用規約', privacyPolicy: 'プライバシーポリシー',
@@ -848,7 +850,7 @@ var I18N = {
     thTicker: 'Điểm của từng mã (số chữ cái trùng với mã khác)', thPts: 'Điểm',
     r3: 'Trùng cả 3 chữ cái', v6: '+6 điểm', r2: 'Trùng 2 chữ cái', v3: '+3 điểm', r1: 'Trùng 1 chữ cái', v1: '+1 điểm',
     r0: 'Không trùng chữ nào (đẩy sang mép phải)', v0: '−3 điểm',
-    rulesNote: 'Điểm tổng là vị trí của bạn trong khoảng điểm có thể đạt được. Mức thấp nhất (không mã nào trùng chữ) tính là 0, mức cao nhất (mọi chữ cái xuất hiện ở mã khác đều trùng nhau) tính là 100, nên số lượng mã nhiều hay ít cũng ít gây thuận lợi hay bất lợi.',
+    rulesNote: 'Điểm tổng là vị trí của bạn trong khoảng điểm có thể đạt được. Mức thấp nhất (không mã nào trùng chữ) tính là 0, mức cao nhất (mọi chữ cái xuất hiện ở mã khác đều trùng nhau) tính là 100, nên số lượng mã nhiều hay ít cũng ít gây thuận lợi hay bất lợi. Mã không có chữ cái nào chung với mã khác thì không thể ghép được, nên bị tính như chưa đạt điểm tối đa và làm giảm điểm tổng.',
     privacyH: 'Quyền riêng tư',
     privacy: 'Trang web này không thu thập hay gửi mã cổ phiếu và kết quả bạn nhập. Mọi xử lý diễn ra ngay trên thiết bị của bạn, và chỉ các mã bạn nhập được lưu trong trình duyệt này để lần sau mở lại vẫn còn (xóa trống ô nhập để xóa). Khi mở trang, phông chữ được tải từ Google Fonts và trang được phân phối qua Cloudflare, nên thông tin kết nối như địa chỉ IP sẽ đến Google và Cloudflare, và Cloudflare có thể lưu nhật ký truy cập.',
     terms: 'Điều khoản sử dụng (tiếng Nhật)', privacyPolicy: 'Chính sách quyền riêng tư (tiếng Nhật)',
@@ -880,7 +882,7 @@ var I18N = {
     thTicker: 'Points per ticker (letters shared with other tickers)', thPts: 'Points',
     r3: 'All 3 letters', v6: '+6 pts', r2: '2 letters', v3: '+3 pts', r1: '1 letter', v1: '+1 pt',
     r0: '0 letters (moved to the right edge)', v0: '−3 pts',
-    rulesNote: 'The overall score is your position within the range of possible points. The lowest total (no ticker overlaps) counts as 0 and the highest (every letter that also appears in another ticker overlaps) counts as 100, so having more or fewer tickers gives no advantage or penalty.',
+    rulesNote: 'The overall score is your position within the range of possible points. The lowest total (no ticker overlaps) counts as 0 and the highest (every letter that also appears in another ticker overlaps) counts as 100, so having more or fewer tickers gives no advantage or penalty. A ticker that shares no letters with any other ticker cannot be combined, so it counts as missing full points and lowers the overall score.',
     privacyH: 'Privacy',
     privacy: 'This site does not collect or send the tickers you enter or your results. Everything is processed on your own device, and only the tickers you enter are saved in this browser for your next visit (empty the input box to clear them). When the page loads, fonts come from Google Fonts and the site is delivered through Cloudflare, so connection details such as your IP address reach Google and Cloudflare, and Cloudflare may keep access logs.',
     terms: 'Terms of Use (Japanese)', privacyPolicy: 'Privacy Policy (Japanese)',

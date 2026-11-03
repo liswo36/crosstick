@@ -68,6 +68,23 @@ test('スコア: 0〜100に収まり、パターン1が最高得点', () => {
   for (const p of [2, 3]) assert.ok(buildLayout(words, p, false).raw <= L1.raw);
 });
 
+test('スコア: 組み合わせられない銘柄（共通文字なし）があると総合スコアが下がる。ない場合は従来どおり', () => {
+  // 従来: 孤立銘柄の点数は上限にも下限にも同じ値が入り、総合スコアに影響しなかった（SSI VCI FPT HNG は 100）
+  const a = buildLayout(['SSI', 'VCI', 'FPT', 'HNG'], 1, false);
+  assert.equal(a.min, -12);
+  assert.equal(a.ub, 14);               // SSI +1, VCI +1, FPT 6（満点扱い）, HNG 6（満点扱い）
+  assert.equal(a.raw, -4);              // SSI +1, VCI +1, FPT -3, HNG -3
+  assert.equal(a.score100, Math.round((-4 + 12) / (14 + 12) * 100)); // 31
+  assert.ok(a.score100 < 50);
+  // 孤立銘柄がなければ上限は変わらない
+  const b = scoreRange(['SSI', 'VCI']);
+  assert.deepEqual([b.min, b.ub], [-6, 2]);
+  // 孤立銘柄を1つ足すと、足す前より下がる
+  const base = parseTickers(SET).words;
+  const withIso = buildLayout(base.concat('ONE'), 1, false), without = buildLayout(base, 1, false);
+  assert.ok(withIso.score100 < without.score100, `${withIso.score100} < ${without.score100}`);
+});
+
 test('共通文字のない2銘柄は交差せず、両方置かれる', () => {
   const L = buildLayout(['ABC', 'XYZ'], 1, false);
   assert.equal(L.placed.length, 2);

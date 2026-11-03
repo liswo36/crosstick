@@ -258,7 +258,9 @@ function tryBuild(words, rng, clean) {
 function pointsFor(o) { return o === 0 ? -3 : o * (o + 1) / 2; }
 
 // 銘柄セットごとの点数の幅。下限は「全銘柄が重ならない」、上限は「ほかの銘柄にも使われている文字が全部重なる」場合。
-// 銘柄数が多いほど有利にならないよう、総合スコアはこの幅の中での位置（0〜100）で出す
+// 銘柄数が多いほど有利にならないよう、総合スコアはこの幅の中での位置（0〜100）で出す。
+// ただし、ほかの銘柄と共通する文字が1つもない銘柄（組み合わせられない銘柄）は、上限でも満点を取れたものとして数える。
+// そのため、そうした銘柄が混ざっているセットは、総合スコアが下がる。
 function scoreRange(words) {
   var ub = 0;
   words.forEach(function(w, i) {
@@ -267,9 +269,9 @@ function scoreRange(words) {
       var ch = w[k];
       if (words.some(function(x, j){ return j !== i && x.indexOf(ch) >= 0; })) o++;
     }
-    ub += pointsFor(o);
+    ub += o === 0 ? pointsFor(w.length) : pointsFor(o);
   });
-  return { min: -3 * words.length, ub: ub };
+  return { min: pointsFor(0) * words.length, ub: ub };
 }
 
 function buildLayout(words, pattern, clean) {
