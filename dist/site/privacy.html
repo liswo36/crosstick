@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>プライバシーポリシー｜Crosstick</title>
+<meta name="description" content="Crosstick（クロスティック）が扱う情報と、外部サービスへの通信についての説明です。">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f4f8fc" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1215" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f8fc;--surface:#fff;--on:#14202b;--on-var:#41505e;--outline:#c3ccd5;--primary:#00658f;--primary-c:#c5e7ff;--seg:#e8eef4}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1215;--surface:#161d22;--on:#e3eaf0;--on-var:#b3c0cc;--outline:#3b4750;--primary:#7fd0ff;--primary-c:#004c6b;--seg:#202a31}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--on);font:400 1.0625rem/1.85 'Noto Sans','Noto Sans JP',sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:16px 16px 56px}
+.top{display:flex;align-items:center;gap:10px;min-height:56px}
+.top a{display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:0 18px 0 12px;border-radius:999px;background:var(--primary-c);color:var(--primary);font-weight:700;text-decoration:none}
+.top a:focus-visible,a:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.top img{width:28px;height:28px}
+main{background:var(--surface);border-radius:28px;padding:28px 24px 32px;border:1px solid var(--outline)}
+h1{margin:0 0 4px;font-size:1.75rem;line-height:1.4;font-weight:800}
+h2{margin:32px 0 8px;font-size:1.25rem;line-height:1.5;font-weight:700}
+p{margin:12px 0}
+ul,ol{margin:12px 0;padding-left:1.5em}
+li{margin:6px 0}
+a{color:var(--primary);font-weight:500}
+code{background:var(--seg);border-radius:6px;padding:2px 6px;font-size:.95em}
+.meta{color:var(--on-var);font-size:.95rem;margin:0 0 20px}
+.tbl{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%}
+th,td{border-bottom:1px solid var(--outline);padding:10px 10px 10px 0;font-size:.95rem;text-align:left;vertical-align:top}
+th{color:var(--on-var);font-weight:700}
+footer{margin-top:20px;display:flex;flex-wrap:wrap;gap:6px 20px;font-size:.95rem}
+@media (max-width:480px){main{padding:22px 18px 26px;border-radius:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="top"><a href="./"><img src="favicon.svg" alt="" width="28" height="28">Crosstick</a></nav>
+<main>
+<h1>プライバシーポリシー</h1>
+<p class="meta">制定日：2026年11月3日</p>
+
+<p>Crosstick（クロスティック）（以下「本サイト」）は、ベトナム株のティッカーコードを図にして画像で保存できる、無料のウェブツールです。運営者 【運営者名（ハンドル名）を入力】（以下「運営者」）は、利用者のプライバシーを大切にするため、本サイトで扱う情報を次のとおり定めます。</p>
+
+<h2>1. 基本方針</h2>
+<p><strong>利用者が入力したティッカーコードや、作った図は、運営者に送られません。</strong> 利用者自身のブラウザの中だけで処理し、保存します。</p>
+<p>本サイトには、ログイン・会員登録・広告・追跡用の Cookie・アクセス解析ツールはありません。運営者が受け取る情報は、次の「3. 運営者が受け取る情報」に書いたものだけです。</p>
+
+<h2>2. ブラウザの中に保存される情報</h2>
+<p>次の情報は、お使いの端末のブラウザ（localStorage）にだけ保存され、運営者のサーバーには送られません。</p>
+<ul>
+<li>入力したティッカーコード（次に開いたときに入力し直さなくてよいように。最大600文字。キー名 <code>crosstick:tickers</code>）</li>
+</ul>
+<p>表示言語、見た目の設定、点数の結果は保存しません。「画像を保存」で書き出した画像は、利用者の端末の中で作られ、利用者が自分で保存・管理するものです。</p>
+<p>保存した内容は、入力欄を空にすると消えます。ブラウザのデータを消す、端末を替える、ブラウザを入れ直すなどでも失われます。ブラウザのサイトデータを消すと、保存された情報をすべて消せます。共用の端末では、保存した内容が次に使う人にも表示されることがあるので、使い終わったら入力欄を空にしてください。</p>
+
+<h2>3. 運営者が受け取る情報</h2>
+<p><strong>アクセスログ：</strong>本サイトは Cloudflare Pages で配信しています。Cloudflare が、配信と安全のために標準のアクセスログ（IP アドレス、閲覧したページ、日時、ブラウザの種類など）を記録することがあります。運営者は、これを個別の利用者を特定する目的では使いません。</p>
+<p><strong>アクセス解析：</strong>本サイトは、アクセス解析ツールを使っていません。</p>
+<p><strong>お問い合わせの情報（個人情報）：</strong>X（旧Twitter）のDMでお問い合わせいただいたときは、アカウント名と、お問い合わせの内容をお預かりします。これらは個人情報にあたることがあります。ご返信と対応の記録のためだけに使い、個人情報保護法にしたがって、大切に取り扱います。ご本人の同意がある場合や法令にもとづく場合を除き、この目的以外に使ったり、第三者に渡したりすることはありません。</p>
+
+<h2>4. 利用目的</h2>
+<ul>
+<li>本サイトを提供し、安全に運用するため</li>
+<li>お問い合わせに対応するため</li>
+</ul>
+
+<h2>5. 外部サービスへの情報の送信（外部送信に関する公表）</h2>
+<p>本サイトを使うと、文字を表示するために、お使いのブラウザから次の外部サービスへ直接通信します。このとき、このサービスに IP アドレスとブラウザの情報が届きます。運営者はこれらの情報を受け取りません。入力したティッカーコードや結果は、この通信に含まれません。取り扱いは、各社の方針をご覧ください。</p>
+<div class="tbl"><table>
+<thead><tr><th scope="col">送信先（サービス）</th><th scope="col">送信される情報</th><th scope="col">目的</th></tr></thead>
+<tbody><tr><td><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Fonts</a>（fonts.googleapis.com、fonts.gstatic.com）</td><td>IP アドレス、ブラウザの情報</td><td>文字（フォント）の表示</td></tr></tbody>
+</table></div>
+<p>なお、本サイトの配信元である <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare</a> には、3 のとおり、アクセスの記録が残ることがあります。ブラウザの設定でフォントの通信を止めることもできますが、その場合、文字の表示が変わることがあります。</p>
+
+<h2>6. Cookie と localStorage</h2>
+<p>本サイトは、Cookie を設定しません。localStorage は、上の 2 の情報を利用者のブラウザに保存するためだけに使います。</p>
+
+<h2>7. 第三者への提供</h2>
+<p>運営者は、法令に基づく場合を除き、受け取った情報を本人の同意なく第三者に提供しません。</p>
+
+<h2>8. 子どもについて</h2>
+<p>本サイトは、13 歳未満の方を対象としていません。</p>
+
+<h2>9. 改定</h2>
+<p>このポリシーを改定するときは、このページに掲載し、制定日・改定日を更新します。受け取る情報を増やすときは、先にここに書きます。</p>
+
+<h2>10. お問い合わせ</h2>
+<p>運営者：【運営者名（ハンドル名）を入力】<br>連絡先：X（旧Twitter）のDM（【XのURLを入力】）</p>
+<p>利用条件については、<a href="terms.html">利用規約</a>をご覧ください。</p>
+</main>
+<footer><a href="./">Crosstick に戻る</a><a href="terms.html">利用規約</a></footer>
+</div>
+</body>
+</html>

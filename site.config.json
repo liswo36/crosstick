@@ -14,5 +14,13 @@
     }
   },
   "themeColorLight": "#f4f8fc",
-  "themeColorDark": "#0d1215"
+  "themeColorDark": "#0d1215",
+  "operator": {
+    "name": "【運営者名（ハンドル名）を入力】",
+    "contactChannel": "X（旧Twitter）のDM",
+    "contactUrl": "【XのURLを入力】",
+    "enacted": "2026年11月3日",
+    "revised": "",
+    "court": "札幌地方裁判所"
+  }
 }

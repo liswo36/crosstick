@@ -45,6 +45,12 @@
 - PC（1024×640以上）・スマホ（360×640以上）で **ページ全体はスクロールしない**（右列の凡例のみ内部スクロール）。
 - ライト／ダーク自動切替。ルール説明のダイアログあり。言語選択はヘッダー右（ヘルプ・画像保存ボタンの左）。
 
+## 利用規約・プライバシーポリシー
+- 本文は `src/pages/terms.body.html`・`src/pages/privacy.body.html`。`scripts/build.mjs` が共通の枠（M3・Noto Sans・ライト／ダーク）に入れて `dist/site/terms.html`・`privacy.html` を出力する。日本語のみ（法的な文面は日本語が正）。
+- 差し込み: `site.config.json` の `operator`（`name` 運営者名、`contactChannel` 連絡手段、`contactUrl` 連絡先のURL、`enacted` 制定日、`revised` 改定日（空なら表示しない）、`court` 専属的合意管轄裁判所）。**`name` と `contactUrl` が未入力（「【」を含む）のままだとビルドが警告する。公開前に入力する。**
+- 「採点のしくみ」ダイアログから両ページへリンクする（新しいタブ）。ベトナム語・英語の画面でも日本語ページへ（リンク名に「(tiếng Nhật)」「(Japanese)」と付ける）。Artifact版にはリンクを入れない。
+- 本文に書いてあることは、コードの動作と一致させる（Cookieなし・アクセス解析なし・localStorage の保存内容・Google Fonts と Cloudflare）。仕様を変えたら本文も直す。ログの保持期間など、確認できていないことは書かない。
+
 ## 入力の保持
 - 入力したティッカーの文字列だけを、このブラウザの `localStorage`（キー `crosstick:tickers`、最大600文字）に保存し、次に開いたとき入力欄に戻す。外へは送らない（CSP `connect-src 'none'` のまま）。
 - 保存のタイミング: 入力の300ms後（パズルの更新と同時）。入力欄を空にすると保存を消し、次回は初期の銘柄に戻る。

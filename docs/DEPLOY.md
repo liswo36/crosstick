@@ -2,8 +2,8 @@
 
 ## Cloudflare Pages（現行・Direct Upload）
 - プロジェクト名: `crosstick`、URL: https://crosstick.pages.dev/
-1. `npm run build`
-2. `dist/site/` の **中身**（`index.html`, `_headers`, `favicon.svg`, `favicon-32.png`, `apple-touch-icon.png`, `og.png`）をアップロードする。
+1. `site.config.json` の `operator`（運営者名・連絡先）が入力済みか確認して、`npm run build`
+2. `dist/site/` の **中身**（`index.html`, `terms.html`, `privacy.html`, `_headers`, `favicon.svg`, `favicon-32.png`, `apple-touch-icon.png`, `og.png`）をアップロードする。
    - 手動: Cloudflare ダッシュボード → Workers & Pages → `crosstick` → 新しいデプロイ → フォルダまたはzipをアップロード。zipの場合は `cd dist/site && zip -r ../crosstick-site.zip .`（フォルダごと入れない）。
    - CLI: `npx wrangler pages deploy dist/site --project-name crosstick`（要 `wrangler login`）。
 3. 公開後の確認: ページが開く／ブラウザの開発者ツールで CSP エラーが出ない／画像保存できる／言語選択（日本語・ベトナム語・英語）で表示が切り替わる／SNSでURLを貼ってOGP画像が出る。
