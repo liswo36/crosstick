@@ -250,7 +250,6 @@ svg [fill="#cfd4d9"] { fill: var(--dim); }
 
 /* スライドするつまみ付きのセグメント */
 .seg {
-  --n: 3;
   --n: 3; position: relative; isolation: isolate; display: flex; padding: 3px;
   border-radius: 999px; background: var(--seg-bg); min-width: calc(var(--n) * 76px);
 }
@@ -349,10 +348,16 @@ body.shoot.mascot-on:not(.score-on) .stage { inset: 16px 16px 122px; }
   body.shoot:not(.score-on) .stage { inset: 12px 12px 70px; }
   body.shoot.mascot-on:not(.score-on) .stage { inset: 12px 12px 94px; }
   .shootbar .tog { flex: 1 1 100%; justify-content: center; }
-  .dock { border-radius: 28px; padding: 10px 12px; gap: 8px 10px; }
-  .dock textarea { flex: 1 1 100%; }
-  .dock .actions { flex: 1 1 100%; display: flex; gap: 8px; }
-  .dock .btn-vn { flex: 1; }
+  /* スマホだけ: 盤面を広げるため、再配置ボタンを入力欄の右隣（縦長・アイコン＋文字）に置き、余白と切替ボタンの高さを少し詰める */
+  .dock { border-radius: 28px; padding: 8px 10px; gap: 6px 8px; }
+  .dock textarea { flex: 1 1 0; min-width: 0; }
+  .dock .actions { flex: 0 0 auto; display: flex; }
+  .dock .btn-vn { flex: none; flex-direction: column; gap: 4px; width: 88px; height: 80px; min-height: 80px; padding: 0 6px; border-radius: 23px; font-size: 1.0625rem; letter-spacing: 0; }
+  .app { gap: 8px; }
+  .board { gap: 6px; }
+  .lcol { gap: 8px; }
+  .under .seg label { min-height: 38px; }
+  .legend { padding-bottom: 2px; }
   .shootbar { width: calc(100vw - 32px); }
   .shootbar .cap { display: none; }
   .shootbar .seg { flex: 1 1 100%; }

@@ -76,6 +76,7 @@
 - 文言は `src/i18n.js`（三言語が同じキーを持つことを `tests/i18n.test.mjs` が検査）。ベトナム語・英語のタイトルと説明は `site.config.json` の `i18n`。
 - フォント: ベトナム語・英語は Noto Sans を先に、日本語は Noto Sans JP を先に使う。
 - 狭い画面（幅760px以下）では言語ボタンは地球儀アイコンのみの丸いボタンになり、ロゴは幅に合わせて縮む（最小34px、360pxまで収まる）。
+- 狭い画面（幅760px以下）だけ、図の表示エリアを広げるため、再配置ボタンを入力欄の右隣（縦長・アイコン＋文字、高さは入力欄と同じ80px）に置き、切替ボタンは高さ44px、余白も少し詰める（PCは変更なし）。例: 390×662 で図の一辺が 200px → 263px。
 
 ## 公開サイトの制約
 CSP: `default-src 'none'`、インラインの `<script>`／`<style>` は **SHA-256 ハッシュで許可**（`'unsafe-inline'` なし。ビルドが `dist/site/_headers` に計算して書く）、`script-src` に `static.cloudflareinsights.com`、`connect-src` に `'self'` と `cloudflareinsights.com`（Cloudflare Web Analytics のビーコン用）。許可する外部は Google Fonts と Cloudflare Web Analytics のみ。HTML／JS は `style` 属性・イベント属性を使わない（動的な値は CSSOM の `style.setProperty`）。ほかに COOP／CORP `same-origin`、HSTS、`/.well-known/security.txt`、`robots.txt`。詳細は `public/_headers`。

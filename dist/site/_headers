@@ -1,5 +1,5 @@
 /*
-  Content-Security-Policy: default-src 'none'; script-src 'sha256-9naG60Akz+ND6zVPraCr4tRWusWLWl/etNWt0TnTzHE=' https://static.cloudflareinsights.com; style-src 'sha256-uh5A4P2aeZS16jvkKpP+2wzggnQekoLtk2hAFtEHb/M=' 'sha256-YftwMMl+PUJhr4Wp2IM2ap6Gk/ZzemPT+4OGeyzaj4Y=' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; manifest-src 'none'; object-src 'none'; media-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'none'; script-src 'sha256-9naG60Akz+ND6zVPraCr4tRWusWLWl/etNWt0TnTzHE=' https://static.cloudflareinsights.com; style-src 'sha256-YZOQVXBJ+uUKsvMul+plFjt+r1MAdQ90o4NYE2g0baI=' 'sha256-YftwMMl+PUJhr4Wp2IM2ap6Gk/ZzemPT+4OGeyzaj4Y=' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; manifest-src 'none'; object-src 'none'; media-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
