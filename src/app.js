@@ -245,20 +245,22 @@
     return { plate: v('--plate'), ink: v('--on-surface'), dim: v('--dim'), stage: v('--stage'), sb: v('--score-bg'), onsb: v('--on-score') };
   }
   /* ロゴ: ヘッダーと同じパスデータ（#cx-logo）をPath2Dで描く */
-  var LOGO = null;
-  function logoData() {
-    if (LOGO) return LOGO;
-    var sym = document.getElementById('cx-logo');
+  var SYMS = {};
+  function logoData(id) {
+    if (SYMS[id]) return SYMS[id];
+    var sym = document.getElementById(id);
     var vb = sym.getAttribute('viewBox').split(/\s+/).map(Number);
     var ps = [].map.call(sym.querySelectorAll('path'), function (p) {
       var tr = p.getAttribute('transform') || '', t = /translate\(\s*([-\d.]+)[ ,]+([-\d.]+)\s*\)/.exec(tr), sc = /scale\(\s*([-\d.]+)\s*\)/.exec(tr);
       return { p: new Path2D(p.getAttribute('d')), f: p.getAttribute('fill'), x: t ? +t[1] : 0, y: t ? +t[2] : 0, s: sc ? +sc[1] : 1 };
     });
-    return (LOGO = { vb: vb, ps: ps });
+    return (SYMS[id] = { vb: vb, ps: ps });
   }
-  function drawLogo(ctx, cx, y, hgt) {
-    var L = logoData(), k = hgt / L.vb[3], w = L.vb[2] * k;
-    ctx.save(); ctx.translate(cx - w / 2, y); ctx.scale(k, k); ctx.translate(-L.vb[0], -L.vb[1]);
+  function drawLogo(ctx, cx, y, hgt) { drawSym(ctx, 'cx-logo', cx, y, hgt, 0); }
+  /* align: 0=cxが中心, 1=cxが右端 */
+  function drawSym(ctx, id, cx, y, hgt, align) {
+    var L = logoData(id), k = hgt / L.vb[3], w = L.vb[2] * k;
+    ctx.save(); ctx.translate(align ? cx - w : cx - w / 2, y); ctx.scale(k, k); ctx.translate(-L.vb[0], -L.vb[1]);
     L.ps.forEach(function (q) { ctx.save(); ctx.translate(q.x, q.y); ctx.scale(q.s, q.s); ctx.fillStyle = q.f; ctx.fill(q.p); ctx.restore(); });
     ctx.restore();
   }
@@ -293,7 +295,10 @@
     ctx.fillStyle = th.stage; ctx.fillRect(0, 0, W, H);
     var unit = Math.min(W, H), m = unit * 0.04, has = layout.score100 !== null && showScore.checked, pillH = has ? unit * 0.085 : 0;
     var logoH = unit * 0.09, gap = m * 0.6, mb = m * 1.6, ly = H - mb - logoH;
-    var aw = W - 2 * m, ah = H - m - mb - logoH - (has ? pillH + gap : 0) - m * 0.8;
+    var mascotH = showMascot.checked ? unit * 0.14 : 0;
+    // マスコットは右下。ロゴ・点数より背が高い分だけ盤面の高さを減らして重ならないようにする
+    var extra = Math.max(0, mascotH - logoH - (has ? pillH + gap : 0));
+    var aw = W - 2 * m, ah = H - m - mb - logoH - (has ? pillH + gap : 0) - m * 0.8 - extra;
     // 盤面は文字の外周ぴったりで切り出す（画面用の余白 0.6マスは除く）
     var b = buildOps(), pad = 0.6 * S, trim = pad - 0.05 * S, cw = b.VW - 2 * trim, chh = b.VH - 2 * trim;
     var k = Math.min(aw / cw, ah / chh, unit * 0.2 / S);
@@ -312,6 +317,7 @@
       ctx.font = '700 ' + f2 + 'px "Noto Sans JP","Noto Sans",sans-serif'; ctx.fillText('点', x, base + f1 * 0.357);
     }
     drawLogo(ctx, W / 2, ly, logoH);
+    if (mascotH) drawSym(ctx, 'cx-mascot', W - m, ly + logoH - mascotH, mascotH, 1);
     return new Promise(function (res) { cv.toBlob(res, 'image/png'); });
   }
   var saveBtn = $('saveBtn'), shootMsg = $('shootMsg'), msgTimer = null;
@@ -346,6 +352,8 @@
   }
   var showScore = $('showScore');
   showScore.addEventListener('change', function () { document.body.classList.toggle('score-on', showScore.checked); fit(); });
+  var showMascot = $('showMascot');
+  showMascot.addEventListener('change', function () { document.body.classList.toggle('mascot-on', showMascot.checked); fit(); });
   $('shootBtn').addEventListener('click', function () { setShoot(true); });
   $('shootClose').addEventListener('click', function () { setShoot(false); });
   document.querySelectorAll('input[name="ratio"]').forEach(function (el) { el.addEventListener('change', fit); });

@@ -1,5 +1,8 @@
 # 変更履歴
 
+## 1.1.0 — 2026-11-03
+- 書き出し画像にマスコット（ヘビ）を右下に入れるON/OFFスイッチを追加（既定OFF）。元SVGは `assets/mascot-snake.svg`、組み込みは `src/partials/mascot-symbol.html`。
+
 ## 1.0.0 — 2026-11-03
 - Artifact v27 を基準に、リポジトリ構成へ分割（`scripts/build.mjs` で単一HTMLに再生成。生成物は従来版とバイト単位で同一）。
 - 単体テスト20件・画面チェック（6サイズ＋ダウンロード）を追加。

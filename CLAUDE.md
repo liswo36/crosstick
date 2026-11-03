@@ -16,7 +16,7 @@
 ## 守る制約
 - 入力はVN上場の3文字コードのみ（`src/data/vn-tickers.txt` に無いコードは受け付けない）。最大40銘柄。
 - 外部へ通信しない（CSP `connect-src 'none'`）。`fetch`/XHR/WebSocket を入れない。外部読み込みは Google Fonts のみ。
-- 書き出し画像: 1600² / 1920×1080 / 1080×1920。ファイル名は `crosstick-YYYYMMDD-HHMMSS-1x1|16x9|9x16.png`。点数表示は既定OFF。
+- 書き出し画像: 1600² / 1920×1080 / 1080×1920。ファイル名は `crosstick-YYYYMMDD-HHMMSS-1x1|16x9|9x16.png`。点数表示・マスコットは既定OFF（マスコットは右下）。
 - 配置は決定的（同じ入力・同じパターンなら同じ結果）。`core.js` を変えたら `tests/core.test.mjs` を確認する。
 
 ## 配置先
