@@ -198,12 +198,12 @@ svg [fill="#cfd4d9"] { fill: var(--dim); }
 .legend { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 4px; scrollbar-width: thin; }
 .chip {
   min-height: 46px; padding: 0 16px 0 14px; border-radius: 23px;
-  border: 1.5px solid var(--outline-var); background: var(--surface); color: var(--on-surface);
+  border: 0; background: var(--seg-bg); color: var(--on-surface);   /* 枠線なし・塗りのみ（枠がない分、背景より少し濃い塗りにする） */
   display: flex; align-items: center; gap: 8px; cursor: pointer; width: 100%; flex: none;
   font-family: var(--font-ui);
-  transition: transform 0.15s, box-shadow 0.15s, background 0.2s, border-color 0.2s;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
 }
-.chip:hover { box-shadow: var(--shadow-sm); border-color: var(--outline); }
+.chip:hover { box-shadow: var(--shadow-sm); }
 .chip .sw { width: 14px; height: 14px; border-radius: 5px; background: var(--c); flex: none; }
 .chip .tk { font: 800 1.1875rem/1 var(--font-glyph); letter-spacing: 0.04em; }
 .chip .dir { font: 500 1rem/1 var(--font-ui); color: var(--on-surface-var); }
@@ -216,19 +216,21 @@ svg [fill="#cfd4d9"] { fill: var(--dim); }
 .chip[aria-pressed="true"] .pt.p3 { color: var(--p3-on); }
 .chip[aria-pressed="true"] .pt.p6 { color: var(--p6-on); }
 .chip[aria-pressed="true"] .pt.m3 { color: var(--m3-on); }
-.chip[aria-pressed="true"] { background: var(--primary-container); border-color: var(--primary); color: var(--on-primary-container); }
+.chip[aria-pressed="true"] { background: var(--primary-container); color: var(--on-primary-container); }
 .chip[aria-pressed="true"] .dir { color: var(--on-primary-container); }
-.chip.off { border-style: dashed; }
+.chip.off { opacity: 0.65; }
 .chip.dim { background: var(--bg); }
 
 /* 操作ドック */
 .dock {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+  display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px 16px;
   background: var(--surface); border: 1px solid var(--outline-var); border-radius: 32px;
   box-shadow: var(--shadow); padding: 10px 12px 10px 14px;
 }
 .dock textarea {
-  flex: 1 1 240px; min-width: 0; min-height: 46px; max-height: 96px; resize: none; overflow-y: auto;
+  flex: 1 1 240px; min-width: 0; resize: none; overflow-y: auto;
+  /* 高さは最初から2行ぶんで固定（入力が増えても枠が動かない。3行以上は中でスクロール）。再配置ボタンと上端をそろえる */
+  height: 80px;
   font-family: var(--font-glyph); font-size: 1.25rem; font-weight: 700;
   letter-spacing: 0.06em; line-height: 1.5; text-transform: uppercase;
   color: var(--on-surface); background: var(--seg-bg);

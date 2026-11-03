@@ -201,21 +201,20 @@
     notes.innerHTML = out;
   }
 
+  var lastSig = null;
   function generate(animate) {
     var p = parseTickers(ta.value);
-    focus = null;
     var known = [], notVn = [];
     p.words.forEach(function (w) { if (VN[w]) known.push(w); else notVn.push(w); });
-    words = known;
     hintInfo = { notVn: notVn, bad: p.bad, over: !!p.over };
     renderHint();
+    // 並べる銘柄と配置パターンが前回と同じなら、描き直さない（スペースや入力途中の文字で画面がちらつかないように）
+    var sig = pattern + '|' + known.join(' ');
+    if (sig === lastSig) return;
+    lastSig = sig; focus = null;
+    words = known;
     layout = buildLayout(words, pattern, false);
     render(animate);
-  }
-
-  function grow() {
-    ta.style.height = 'auto';
-    ta.style.height = Math.min(ta.scrollHeight + 2, 96) + 'px';
   }
 
   // 全角英数字は半角に、小文字は大文字にそろえる（変換中は触らず、確定した時点で直す）
@@ -239,7 +238,7 @@
     } catch (e) {}
   }
   function onType() {
-    normalizeInput(); grow();
+    normalizeInput();
     clearTimeout(timer);
     timer = setTimeout(function () { generate(true); saveTickers(); }, 300);
   }
@@ -425,6 +424,5 @@
 
   setLang(detectLang(), false);
   ta.value = loadTickers() || DEFAULT;
-  grow();
   generate(false);
 })();
