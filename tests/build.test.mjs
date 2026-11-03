@@ -63,3 +63,24 @@ test('アプリ内のダイアログから規約へのリンクがあり、Artif
   assert.ok(site.includes('href="terms.html"') && site.includes('href="privacy.html"'));
   assert.ok(!art.includes('terms.html') && !art.includes('<!--LEGAL-->'));
 });
+
+test('_headers: unsafe-inline が無く、インラインの script/style のハッシュが実物と一致する', async () => {
+  const { createHash } = await import('node:crypto');
+  const sha = (x) => `'sha256-${createHash('sha256').update(x, 'utf8').digest('base64')}'`;
+  const dir = join(ROOT, 'dist/site');
+  const hd = readFileSync(join(dir, '_headers'), 'utf8');
+  const csp = hd.match(/Content-Security-Policy: (.*)/)[1];
+  assert.ok(!/unsafe-inline|unsafe-eval/.test(csp) && !/\{\{/.test(hd));
+  for (const f of ['index.html', 'terms.html', 'privacy.html']) {
+    const h = readFileSync(join(dir, f), 'utf8');
+    for (const m of h.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)) assert.ok(csp.includes(sha(m[1])), `${f}: script`);
+    for (const m of h.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)) assert.ok(csp.includes(sha(m[1])), `${f}: style`);
+    assert.ok(!/\sstyle=|\son[a-z]+=/.test(h), `${f}: style/イベント属性`);
+  }
+  for (const w of ['Cross-Origin-Opener-Policy: same-origin', 'Cross-Origin-Resource-Policy: same-origin', 'Strict-Transport-Security', "frame-ancestors 'none'", "connect-src 'none'"]) assert.ok(hd.includes(w), w);
+  assert.ok(existsSync(join(dir, '.well-known/security.txt')) && existsSync(join(dir, 'robots.txt')));
+});
+test('ソースに style 属性・イベント属性・innerHTML への生のユーザー入力が無い', () => {
+  for (const f of ['src/app.js', 'src/body.html', 'src/partials/logo-symbol.html'])
+    assert.ok(!/\sstyle="|\son[a-z]+="/.test(readFileSync(join(ROOT, f), 'utf8')), f);
+});

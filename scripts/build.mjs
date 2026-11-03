@@ -9,7 +9,8 @@
  *   dist/artifact.html    … Claude の Artifact に貼る版（<html>や<head>を含まない断片）
  * dist/ は生成物なので直接は編集しない。変更は src/ ・ public/ ・ site.config.json に加える。
  */
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, copyFileSync, rmSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, copyFileSync, cpSync, rmSync, existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -52,7 +53,8 @@ if (!app.includes('/*@SITE_META@*/null')) throw new Error('src/app.js に /*@SIT
 const metaJson = JSON.stringify(siteMeta).replace(/</g, '\\u003c');
 app = app.replace('/*@SITE_META@*/null', () => metaJson);
 
-const script = `<script>\n${core}\n${i18n}${app}</script>`;
+const scriptBody = `\n${core}\n${i18n}${app}`;
+const script = `<script>${scriptBody}</script>`;
 
 /* ---------- Claude Artifact 版（断片） ---------- */
 const artifact = `${headArtifact}<style>${css}</style>${body.replace(/<!--LEGAL-->[\s\S]*?<!--\/LEGAL-->/g, '')}${script}\n`;
@@ -91,7 +93,7 @@ ${fonts}
 <style>${css}</style>
 </head>
 <body>
-<noscript><p style="padding:24px;font:700 18px sans-serif">このツールを使うにはJavaScriptを有効にしてください。</p></noscript>
+<noscript><p class="nojs">このツールを使うにはJavaScriptを有効にしてください。</p></noscript>
 ${body.replace(/^\n+/, '')}${script}
 
 </body>
@@ -178,7 +180,18 @@ mkdirSync(join(dist, 'site'), { recursive: true });
 writeFileSync(join(dist, 'artifact.html'), artifact);
 writeFileSync(join(dist, 'site', 'index.html'), site);
 for (const [name, html] of Object.entries(pages)) writeFileSync(join(dist, 'site', name), html);
-for (const f of readdirSync(join(ROOT, 'public'))) copyFileSync(join(ROOT, 'public', f), join(dist, 'site', f));
+for (const f of readdirSync(join(ROOT, 'public'))) {
+  if (f === '_headers') continue;
+  cpSync(join(ROOT, 'public', f), join(dist, 'site', f), { recursive: true });
+}
+/* ---------- _headers: インラインの script / style は SHA-256 ハッシュで許可（'unsafe-inline' は使わない） ---------- */
+const sha = (str) => `'sha256-${createHash('sha256').update(str, 'utf8').digest('base64')}'`;
+const styleHashes = [css, PAGE_CSS].map(sha);
+const headers = read('public/_headers')
+  .replace('{{SCRIPT_HASH}}', sha(scriptBody))
+  .replace('{{STYLE_HASHES}}', styleHashes.join(' '));
+if (/\{\{[A-Z_]+\}\}/.test(headers)) throw new Error('public/_headers に未置換の {{...}} があります');
+writeFileSync(join(dist, 'site', '_headers'), headers);
 const kb = (s) => (Buffer.byteLength(s) / 1024).toFixed(1) + ' KB';
 console.log(`ティッカー ${codes.length} 件`);
 console.log(`dist/site/index.html  ${kb(site)}`);

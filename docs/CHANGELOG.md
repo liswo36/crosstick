@@ -34,3 +34,4 @@
 - 公開サイト化（Cloudflare Pages）、OGP・ファビコン・セキュリティヘッダ追加。CSP下で動く通常ダウンロードのフォールバック。
 - 狭い画面（360×640）での枠とヘッダーの重なりを修正。
 - ティッカー一覧を Vietstock の1,519件に更新。
+- セキュリティ強化: CSP から `'unsafe-inline'` を除去しインラインの script/style を SHA-256 ハッシュで許可（ビルドが `_headers` を生成）。`style` 属性を廃止（CSSOM へ）。COOP/CORP/HSTS 追加、`security.txt`・`robots.txt` 追加、`npm run test:csp`（本番と同じヘッダーで実ブラウザ検査）。

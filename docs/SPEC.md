@@ -77,4 +77,4 @@
 - 狭い画面（幅760px以下）では言語ボタンは地球儀アイコンのみの丸いボタンになり、ロゴは幅に合わせて縮む（最小34px、360pxまで収まる）。
 
 ## 公開サイトの制約
-CSP: `default-src 'none'`、スクリプトとスタイルはインラインのみ、`connect-src 'none'`（外部通信なし）。許可する外部はGoogle Fontsのみ。詳細は `public/_headers`。
+CSP: `default-src 'none'`、インラインの `<script>`／`<style>` は **SHA-256 ハッシュで許可**（`'unsafe-inline'` なし。ビルドが `dist/site/_headers` に計算して書く）、`connect-src 'none'`（外部通信なし）。許可する外部はGoogle Fontsのみ。HTML／JS は `style` 属性・イベント属性を使わない（動的な値は CSSOM の `style.setProperty`）。ほかに COOP／CORP `same-origin`、HSTS、`/.well-known/security.txt`、`robots.txt`。詳細は `public/_headers`。

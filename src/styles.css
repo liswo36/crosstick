@@ -250,6 +250,7 @@ svg [fill="#cfd4d9"] { fill: var(--dim); }
 
 /* スライドするつまみ付きのセグメント */
 .seg {
+  --n: 3;
   --n: 3; position: relative; isolation: isolate; display: flex; padding: 3px;
   border-radius: 999px; background: var(--seg-bg); min-width: calc(var(--n) * 76px);
 }
@@ -365,3 +366,8 @@ body.shoot:not(.score-on) .stage { inset: 16px 16px 90px; }
   .chip:hover { transform: translateY(-1px); }
 }
 @keyframes pop { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: none; } }
+
+/* インライン style 属性を使わない（CSP から 'unsafe-inline' を外すため） */
+.sprite { position: absolute; }
+.nojs { padding: 24px; font: 700 18px sans-serif; }
+.g.ink { fill: var(--on-surface); }

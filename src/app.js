@@ -122,14 +122,14 @@
       defs += '<clipPath id="' + id + '"><polygon points="' + b.clips[id].map(function (q) { return q[0] + ',' + q[1]; }).join(' ') + '"/></clipPath>';
     });
     b.groups.forEach(function (g) {
-      body += '<g class="pop" style="--o:' + g.order + '">';
+      body += '<g class="pop" data-o="' + g.order + '">';
       g.items.forEach(function (it) {
         var clip = it.clip ? ' clip-path="url(#' + it.clip + ')"' : '';
         if (it.k === 'rect') {
           body += '<rect' + (it.f === '@plate' ? ' class="plate"' : ' fill="' + it.f + '"') + ' x="' + it.x + '" y="' + it.y + '" width="' + it.w + '" height="' + it.h + '" rx="' + it.r + '"' + clip + '/>';
         } else {
-          body += '<text class="g' + (it.w === 800 ? ' t' : '') + '" x="' + it.x + '" y="' + it.y + '" text-anchor="middle" font-size="' + it.fs + '" ' +
-            (it.f === '@ink' ? 'style="fill:var(--on-surface)"' : 'fill="' + it.f + '"') + clip + '>' + it.ch + '</text>';
+          body += '<text class="g' + (it.w === 800 ? ' t' : '') + (it.f === '@ink' ? ' ink' : '') + '" x="' + it.x + '" y="' + it.y + '" text-anchor="middle" font-size="' + it.fs + '" ' +
+            (it.f === '@ink' ? '' : 'fill="' + it.f + '"') + clip + '>' + it.ch + '</text>';
         }
       });
       body += '</g>';
@@ -147,6 +147,8 @@
     }
     var label = layout.placed.map(function (p) { return words[p.wi] + '(' + dirName(p.dir) + ')'; }).join(msg('comma'));
     stage.innerHTML = opsToSvg(buildOps(), animate, label);
+    // CSP で style 属性を使えないため、アニメ順は data-o から CSSOM で設定する
+    Array.prototype.forEach.call(stage.querySelectorAll('.pop'), function (g) { g.style.setProperty('--o', g.getAttribute('data-o')); });
     renderScore(animate);
     renderLegend(wordInfo());
     renderNotes();
@@ -184,10 +186,12 @@
       var p = info[i], sc = layout.per[i];
       var d = p ? dirName(p.dir) : msg('unplaced');
       var label = msg('chip')(w, d, sc.o, sc.L, pts(sc.pts));
-      return '<button type="button" class="chip' + (p ? '' : ' off') + (focus !== null && focus !== i ? ' dim' : '') + '" data-i="' + i + '" aria-pressed="' + (focus === i) + '" aria-label="' + label + '" title="' + label + '" style="--c:' + colorFor(i) + '">' +
+      return '<button type="button" class="chip' + (p ? '' : ' off') + (focus !== null && focus !== i ? ' dim' : '') + '" data-i="' + i + '" aria-pressed="' + (focus === i) + '" aria-label="' + label + '" title="' + label + '">' +
         '<span class="sw" aria-hidden="true"></span><span class="tk">' + w + '</span><span class="dir">' + d + '</span>' +
         '<span class="pt ' + (sc.pts < 0 ? 'm3' : sc.pts >= 6 ? 'p6' : sc.pts >= 3 ? 'p3' : 'p1') + '">' + pts(sc.pts) + '</span></button>';
     }).join('');
+    // 色は style 属性ではなく CSSOM で設定する（CSP 対応）
+    Array.prototype.forEach.call(legend.querySelectorAll('.chip'), function (b) { b.style.setProperty('--c', colorFor(+b.getAttribute('data-i'))); });
   }
 
   function renderNotes() {

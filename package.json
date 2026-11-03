@@ -7,7 +7,10 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "node --test tests/core.test.mjs tests/build.test.mjs tests/i18n.test.mjs",
-    "test:e2e": "python3 tests/e2e/run_all.py"
+    "test:e2e": "python3 tests/e2e/run_all.py",
+    "test:csp": "python3 tests/e2e/csp_check.py"
   },
-  "engines": { "node": ">=18" }
+  "engines": {
+    "node": ">=18"
+  }
 }
