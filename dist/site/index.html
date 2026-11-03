@@ -448,7 +448,7 @@ body.shoot:not(.score-on) .stage { inset: 16px 16px 90px; }
         </table>
         <p data-i="rulesNote">総合スコアは、取りうる点数の幅の中での位置です。最低点（どの銘柄も重ならない）を0、上限点（ほかの銘柄にも出てくる文字がすべて重なる）を100として換算するので、銘柄数が多くても有利・不利になりにくい仕組みです。</p>
         <h3 data-i="privacyH">プライバシー</h3>
-        <p class="privacy" data-i="privacy">このサイトは、入力した銘柄コードや結果を含め、情報を収集・送信・保存しません。処理はすべてお使いの端末の中で行い、開くたびに初期の銘柄に戻ります。画像の保存も端末の中で作ります。なお、ページを開く際の通信は避けられません。文字を表示するためにGoogle Fontsからフォントを読み込み、サイトの配信にはCloudflareを使っているため、IPアドレスなど通信に必要な情報がGoogleとCloudflareに届きます。Cloudflareには、配信や不正対策のために、アクセスの記録が残ることがあります。入力した銘柄コードや結果は、これらの通信に含まれません。</p>
+        <p class="privacy" data-i="privacy">このサイトは、入力した銘柄コードや結果を集めたり、送ったり、保存したりしません。処理はすべてお使いの端末の中で行います。なお、ページを開くときはGoogle Fontsからフォントを読み込み、配信にはCloudflareを使っています。そのためIPアドレスなどの通信情報はGoogleとCloudflareに届き、Cloudflareにはアクセスの記録が残ることがあります。</p>
         <div class="dlg-actions"><button class="btn btn-filled" id="rulesClose" type="button" data-i="close">閉じる</button></div>
       </div>
     </dialog>
@@ -832,7 +832,7 @@ var I18N = {
     r0: '0文字（右端に寄せます）', v0: '−3点',
     rulesNote: '総合スコアは、取りうる点数の幅の中での位置です。最低点（どの銘柄も重ならない）を0、上限点（ほかの銘柄にも出てくる文字がすべて重なる）を100として換算するので、銘柄数が多くても有利・不利になりにくい仕組みです。',
     privacyH: 'プライバシー',
-    privacy: 'このサイトは、入力した銘柄コードや結果を含め、情報を収集・送信・保存しません。処理はすべてお使いの端末の中で行い、開くたびに初期の銘柄に戻ります。画像の保存も端末の中で作ります。なお、ページを開く際の通信は避けられません。文字を表示するためにGoogle Fontsからフォントを読み込み、サイトの配信にはCloudflareを使っているため、IPアドレスなど通信に必要な情報がGoogleとCloudflareに届きます。Cloudflareには、配信や不正対策のために、アクセスの記録が残ることがあります。入力した銘柄コードや結果は、これらの通信に含まれません。',
+    privacy: 'このサイトは、入力した銘柄コードや結果を集めたり、送ったり、保存したりしません。処理はすべてお使いの端末の中で行います。なお、ページを開くときはGoogle Fontsからフォントを読み込み、配信にはCloudflareを使っています。そのためIPアドレスなどの通信情報はGoogleとCloudflareに届き、Cloudflareにはアクセスの記録が残ることがあります。',
     close: '閉じる',
     look: '見た目', lookText: '文字だけ', lookPlate: '薄グレー', lookTile: 'タイル',
     ov: '重なる文字の色', ovSplit: '2色', ovSingle: '単色', ovBlack: '黒文字',
@@ -863,7 +863,7 @@ var I18N = {
     r0: 'Không trùng chữ nào (đẩy sang mép phải)', v0: '−3 điểm',
     rulesNote: 'Điểm tổng là vị trí của bạn trong khoảng điểm có thể đạt được. Mức thấp nhất (không mã nào trùng chữ) tính là 0, mức cao nhất (mọi chữ cái xuất hiện ở mã khác đều trùng nhau) tính là 100, nên số lượng mã nhiều hay ít cũng ít gây thuận lợi hay bất lợi.',
     privacyH: 'Quyền riêng tư',
-    privacy: 'Trang web này không thu thập, gửi hay lưu trữ thông tin, kể cả mã cổ phiếu và kết quả bạn nhập. Mọi xử lý đều diễn ra ngay trên thiết bị của bạn, và mỗi lần mở lại trang sẽ quay về danh sách mã ban đầu. Hình ảnh cũng được tạo ngay trên thiết bị. Lưu ý: việc mở trang luôn kéo theo kết nối mạng. Trang tải phông chữ từ Google Fonts và được phân phối qua Cloudflare, nên các thông tin cần thiết cho kết nối như địa chỉ IP sẽ đến Google và Cloudflare. Cloudflare có thể lưu lại nhật ký truy cập để phân phối và chống lạm dụng. Mã cổ phiếu và kết quả bạn nhập không nằm trong các kết nối này.',
+    privacy: 'Trang web này không thu thập, gửi hay lưu mã cổ phiếu và kết quả bạn nhập. Mọi xử lý diễn ra ngay trên thiết bị của bạn. Khi mở trang, phông chữ được tải từ Google Fonts và trang được phân phối qua Cloudflare, nên thông tin kết nối như địa chỉ IP sẽ đến Google và Cloudflare, và Cloudflare có thể lưu nhật ký truy cập.',
     close: 'Đóng',
     look: 'Kiểu hiển thị', lookText: 'Chỉ chữ', lookPlate: 'Nền xám nhạt', lookTile: 'Ô gạch',
     ov: 'Màu chữ trùng nhau', ovSplit: '2 màu', ovSingle: '1 màu', ovBlack: 'Chữ đen',
@@ -894,7 +894,7 @@ var I18N = {
     r0: '0 letters (moved to the right edge)', v0: '−3 pts',
     rulesNote: 'The overall score is your position within the range of possible points. The lowest total (no ticker overlaps) counts as 0 and the highest (every letter that also appears in another ticker overlaps) counts as 100, so having more or fewer tickers gives no advantage or penalty.',
     privacyH: 'Privacy',
-    privacy: 'This site does not collect, send, or store any information, including the tickers you enter and your results. Everything is processed on your own device, and the page returns to its starting tickers each time you open it. Saved images are also created on your device. Note that opening a page always involves network requests. Fonts are loaded from Google Fonts and the site is delivered through Cloudflare, so information needed for the connection, such as your IP address, reaches Google and Cloudflare. Cloudflare may keep access logs for delivery and abuse prevention. The tickers you enter and your results are not part of these requests.',
+    privacy: 'This site does not collect, send, or store the tickers you enter or your results. Everything is processed on your own device. When the page loads, fonts come from Google Fonts and the site is delivered through Cloudflare, so connection details such as your IP address reach Google and Cloudflare, and Cloudflare may keep access logs.',
     close: 'Close',
     look: 'Style', lookText: 'Letters only', lookPlate: 'Light gray', lookTile: 'Tiles',
     ov: 'Overlap color', ovSplit: 'Two-tone', ovSingle: 'Single', ovBlack: 'Black text',
