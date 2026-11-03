@@ -135,7 +135,9 @@ body {
 header { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; }
 h1.logo { margin: 0; flex: none; line-height: 0; }
 .logo-svg { --lh: 60px; display: block; height: var(--lh); width: calc(var(--lh) * 3.925); }
-.lead { margin: 0; color: var(--on-surface-var); font-size: 1.125rem; flex: 1 1 240px; min-width: 0; }
+.lead { margin: 0; color: var(--on-surface-var); font-size: 1.125rem; flex: 1 1 240px; min-width: 0;
+  /* 長くなった日本語が「…おう」で折れて1文字だけ残らないよう、文節で折り返して行の長さをそろえる */
+  word-break: auto-phrase; text-wrap: balance; }
 .hactions { display: flex; gap: 6px; margin-left: auto; }
 header .short { display: none; }
 /* 言語選択: 見た目はボタン、実体は透明なselect（押すとOSの選択画面が開く） */
