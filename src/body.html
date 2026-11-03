@@ -3,30 +3,39 @@
 <!--@LOGO_SYMBOL@-->
 <div class="app">
   <header>
-    <h1 class="logo"><svg class="logo-svg" role="img" aria-label="Crosstick（クロスティック）"><use href="#cx-logo" width="100%" height="100%"/></svg></h1>
-    <p class="lead">ベトナム株のティッカーをパズルにできる</p>
+    <h1 class="logo"><svg class="logo-svg" role="img" data-i-aria="logo" aria-label="Crosstick（クロスティック）"><use href="#cx-logo" width="100%" height="100%"/></svg></h1>
+    <p class="lead" data-i="lead">ベトナム株のティッカーをパズルにできる</p>
     <div class="hactions">
-      <button class="btn btn-tonal iconbtn" id="rulesBtn" type="button" aria-haspopup="dialog" aria-label="採点のしくみとプライバシー">
+      <label class="btn btn-tonal langbtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19"/><path d="M12 2.5c2.6 2.6 4 5.9 4 9.5s-1.4 6.9-4 9.5c-2.6-2.6-4-5.9-4-9.5s1.4-6.9 4-9.5z"/></svg>
+        <span class="code" id="langCode" aria-hidden="true">JA</span>
+        <select class="langsel" id="lang" aria-label="言語 / Ngôn ngữ / Language">
+          <option value="ja">日本語</option>
+          <option value="vi">Tiếng Việt</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+      <button class="btn btn-tonal iconbtn" id="rulesBtn" type="button" aria-haspopup="dialog" data-i-aria="rulesAria" aria-label="採点のしくみとプライバシー">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.3a2.9 2.9 0 1 1 4.4 2.5c-.9.6-1.6 1.1-1.6 2.3"/><circle cx="12" cy="17.4" r="0.6" fill="currentColor"/></svg>
       </button>
-      <button class="btn btn-tonal" id="shootBtn" type="button" aria-label="画像を保存"><span class="full">画像を保存</span><span class="short" aria-hidden="true">保存</span></button>
+      <button class="btn btn-tonal" id="shootBtn" type="button" data-i-aria="saveImage" aria-label="画像を保存"><span class="full" data-i="saveImage">画像を保存</span><span class="short" data-i="saveShort" aria-hidden="true">保存</span></button>
     </div>
     <dialog class="dlg" id="rules" aria-labelledby="rulesTitle">
       <div class="dlg-in">
-        <h2 id="rulesTitle">採点のしくみ</h2>
+        <h2 id="rulesTitle" data-i="rulesTitle">採点のしくみ</h2>
         <table>
-          <thead><tr><th scope="col">銘柄ごとの点数（ほかの銘柄と重なる文字の数）</th><th scope="col">点数</th></tr></thead>
+          <thead><tr><th scope="col" data-i="thTicker">銘柄ごとの点数（ほかの銘柄と重なる文字の数）</th><th scope="col" data-i="thPts">点数</th></tr></thead>
           <tbody>
-            <tr><td>3文字すべて</td><td>+6点</td></tr>
-            <tr><td>2文字</td><td>+3点</td></tr>
-            <tr><td>1文字</td><td>+1点</td></tr>
-            <tr><td>0文字（右端に寄せます）</td><td class="neg">−3点</td></tr>
+            <tr><td data-i="r3">3文字すべて</td><td data-i="v6">+6点</td></tr>
+            <tr><td data-i="r2">2文字</td><td data-i="v3">+3点</td></tr>
+            <tr><td data-i="r1">1文字</td><td data-i="v1">+1点</td></tr>
+            <tr><td data-i="r0">0文字（右端に寄せます）</td><td class="neg" data-i="v0">−3点</td></tr>
           </tbody>
         </table>
-        <p>総合スコアは、取りうる点数の幅の中での位置です。最低点（どの銘柄も重ならない）を0、上限点（ほかの銘柄にも出てくる文字がすべて重なる）を100として換算するので、銘柄数が多くても有利・不利になりにくい仕組みです。</p>
-        <h3>プライバシー</h3>
-        <p class="privacy">このサイトは、入力した銘柄コードや結果を含め、情報を収集・送信・保存しません。処理はすべてお使いの端末の中で行い、開くたびに初期の銘柄に戻ります。画像の保存も端末の中で作ります。なお、文字を表示するためにGoogle Fontsからフォントを読み込みます。また、サイトを配信するサーバーには、一般的なアクセスの記録が残ることがあります。</p>
-        <div class="dlg-actions"><button class="btn btn-filled" id="rulesClose" type="button">閉じる</button></div>
+        <p data-i="rulesNote">総合スコアは、取りうる点数の幅の中での位置です。最低点（どの銘柄も重ならない）を0、上限点（ほかの銘柄にも出てくる文字がすべて重なる）を100として換算するので、銘柄数が多くても有利・不利になりにくい仕組みです。</p>
+        <h3 data-i="privacyH">プライバシー</h3>
+        <p class="privacy" data-i="privacy">このサイトは、入力した銘柄コードや結果を含め、情報を収集・送信・保存しません。処理はすべてお使いの端末の中で行い、開くたびに初期の銘柄に戻ります。画像の保存も端末の中で作ります。なお、文字を表示するためにGoogle Fontsからフォントを読み込みます。また、サイトを配信するサーバーには、一般的なアクセスの記録が残ることがあります。</p>
+        <div class="dlg-actions"><button class="btn btn-filled" id="rulesClose" type="button" data-i="close">閉じる</button></div>
       </div>
     </dialog>
   </header>
@@ -40,55 +49,55 @@
       </div>
       <div class="under" id="under">
         <fieldset class="grp">
-          <legend>見た目</legend>
+          <legend data-i="look">見た目</legend>
           <div class="seg" style="--n:3">
-            <input type="radio" name="look" id="l-text" value="text" checked><label for="l-text">文字だけ</label>
-            <input type="radio" name="look" id="l-plate" value="plate"><label for="l-plate">薄グレー</label>
-            <input type="radio" name="look" id="l-tile" value="tile"><label for="l-tile">タイル</label>
+            <input type="radio" name="look" id="l-text" value="text" checked><label for="l-text" data-i="lookText">文字だけ</label>
+            <input type="radio" name="look" id="l-plate" value="plate"><label for="l-plate" data-i="lookPlate">薄グレー</label>
+            <input type="radio" name="look" id="l-tile" value="tile"><label for="l-tile" data-i="lookTile">タイル</label>
           </div>
         </fieldset>
         <fieldset class="grp">
-          <legend>重なる文字の色</legend>
+          <legend data-i="ov">重なる文字の色</legend>
           <div class="seg" style="--n:3">
-            <input type="radio" name="ov" id="o-split" value="split" checked><label for="o-split">2色</label>
-            <input type="radio" name="ov" id="o-single" value="single"><label for="o-single">単色</label>
-            <input type="radio" name="ov" id="o-black" value="black"><label for="o-black">全部黒字</label>
+            <input type="radio" name="ov" id="o-split" value="split" checked><label for="o-split" data-i="ovSplit">2色</label>
+            <input type="radio" name="ov" id="o-single" value="single"><label for="o-single" data-i="ovSingle">単色</label>
+            <input type="radio" name="ov" id="o-black" value="black"><label for="o-black" data-i="ovBlack">全部黒字</label>
           </div>
         </fieldset>
       </div>
     </div>
-    <aside class="rcol" id="rcol" aria-label="銘柄ごとの重なりと点数">
+    <aside class="rcol" id="rcol" data-i-aria="rcolAria" aria-label="銘柄ごとの重なりと点数">
       <div class="legend" id="legend"></div>
       <div id="notes"></div>
     </aside>
   </main>
 
-  <section class="dock" aria-label="入力と設定">
-    <label class="sr-only" for="tickers">ティッカー（スペース、カンマ、改行で区切る）</label>
-    <textarea id="tickers" rows="1" spellcheck="false" autocomplete="off" autocapitalize="characters" placeholder="ティッカーを入力（例: SSI CTR VCI）"></textarea>
+  <section class="dock" data-i-aria="dockAria" aria-label="入力と設定">
+    <label class="sr-only" for="tickers" data-i="tickersLabel">ティッカー（スペース、カンマ、改行で区切る）</label>
+    <textarea id="tickers" rows="1" spellcheck="false" autocomplete="off" autocapitalize="characters" data-i-ph="placeholder" placeholder="ティッカーを入力（例: SSI CTR VCI）"></textarea>
     <div class="actions">
       <button class="btn btn-vn" id="shuffle" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
-        再配置
+        <span data-i="shuffle">再配置</span>
       </button>
     </div>
     <p class="hint" id="hint" aria-live="polite"></p>
   </section>
 </div>
 
-<div class="shootbar" id="shootbar" role="toolbar" aria-label="画像を保存" hidden>
-  <span class="cap" aria-hidden="true">比率</span>
+<div class="shootbar" id="shootbar" role="toolbar" data-i-aria="saveImage" aria-label="画像を保存" hidden>
+  <span class="cap" data-i="ratio" aria-hidden="true">比率</span>
   <div class="seg" style="--n:3">
     <input type="radio" name="ratio" id="r-1" value="1:1" checked><label for="r-1">1:1</label>
     <input type="radio" name="ratio" id="r-2" value="16:9"><label for="r-2">16:9</label>
     <input type="radio" name="ratio" id="r-3" value="9:16"><label for="r-3">9:16</label>
   </div>
-  <label class="tog" for="showScore"><input type="checkbox" id="showScore" role="switch"><span class="track" aria-hidden="true"></span><span class="tl">点数を入れる</span></label>
+  <label class="tog" for="showScore"><input type="checkbox" id="showScore" role="switch"><span class="track" aria-hidden="true"></span><span class="tl" data-i="showScore">点数を入れる</span></label>
   <button class="btn btn-filled" id="saveBtn" type="button" hidden>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
-    画像を保存
+    <span data-i="saveImage">画像を保存</span>
   </button>
-  <button class="btn btn-tonal" id="shootClose" type="button">閉じる</button>
+  <button class="btn btn-tonal" id="shootClose" type="button" data-i="close">閉じる</button>
   <span class="shootmsg" id="shootMsg" role="status"></span>
 </div>
 

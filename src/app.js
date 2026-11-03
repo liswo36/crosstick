@@ -14,6 +14,51 @@
   var words = [], layout = null, pattern = 1, focus = null, timer = null;
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* 言語（日本語・ベトナム語・英語）。文言は i18n.js。選んだ言語は保存せず、URLの #ja / #vi / #en とブラウザの言語設定で決める */
+  var SITE_META = /*@SITE_META@*/null;
+  var lang = 'ja', hintInfo = { notVn: [], bad: [], over: false };
+  var langSel = $('lang');
+  var seo = !!document.querySelector('meta[name="description"]'); // Artifact版にはタイトル・説明のメタ情報が無い
+  function msg(k) { return I18N[lang][k]; }
+  function dirName(d) { return d === 0 ? msg('across') : msg('down'); }
+  // 画像の単位（点・điểm・pts）の字体。ベトナム語・英語ではNoto Sansを先に使う
+  function uiFont() { return lang === 'ja' ? '"Noto Sans JP","Noto Sans",sans-serif' : '"Noto Sans","Noto Sans JP",sans-serif'; }
+  function renderHint() {
+    var msgs = [];
+    if (hintInfo.notVn.length) msgs.push(msg('exNotVn') + hintInfo.notVn.join(', '));
+    if (hintInfo.bad.length) msgs.push(msg('exBad') + hintInfo.bad.join(', '));
+    if (hintInfo.over) msgs.push(msg('over'));
+    hint.textContent = msgs.length ? msgs.join(msg('sep')) + msg('end') : '';
+  }
+  function detectLang() {
+    var m = /^#(ja|vi|en)$/.exec(location.hash);
+    if (m) return m[1];
+    var ls = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'ja'];
+    for (var i = 0; i < ls.length; i++) {
+      var l = String(ls[i]).toLowerCase();
+      if (l.indexOf('ja') === 0) return 'ja';
+      if (l.indexOf('vi') === 0) return 'vi';
+      if (l.indexOf('en') === 0) return 'en';
+    }
+    return 'en';
+  }
+  function setLang(code, redraw) {
+    if (!I18N[code]) code = 'ja';
+    lang = code;
+    document.documentElement.setAttribute('lang', code);
+    document.querySelectorAll('[data-i]').forEach(function (el) { el.textContent = msg(el.getAttribute('data-i')); });
+    document.querySelectorAll('[data-i-aria]').forEach(function (el) { el.setAttribute('aria-label', msg(el.getAttribute('data-i-aria'))); });
+    document.querySelectorAll('[data-i-ph]').forEach(function (el) { el.setAttribute('placeholder', msg(el.getAttribute('data-i-ph'))); });
+    var sm = SITE_META && SITE_META[code];
+    if (seo && sm) {
+      document.title = sm.title;
+      document.querySelector('meta[name="description"]').setAttribute('content', sm.description);
+    }
+    langSel.value = code;
+    $('langCode').textContent = code.toUpperCase();
+    if (redraw) { renderHint(); render(false); }
+  }
+
   function opt(name) { return document.querySelector('input[name="' + name + '"]:checked').value; }
 
   function wordInfo() {
@@ -90,17 +135,17 @@
       body += '</g>';
     });
     return '<svg id="puzzle" class="' + (animate ? 'anim' : '') + '" viewBox="0 0 ' + b.VW + ' ' + b.VH +
-      '" role="img" aria-label="Crosstick。' + label + '"><defs>' + defs + '</defs>' + body + '</svg>';
+      '" role="img" aria-label="' + msg('puzzleAria') + label + '"><defs>' + defs + '</defs>' + body + '</svg>';
   }
 
   function render(animate) {
     if (!layout) {
-      stage.innerHTML = '<p class="empty">ティッカーを入力すると、ここにパズルができます。</p>';
+      stage.innerHTML = '<p class="empty">' + msg('empty') + '</p>';
       notes.innerHTML = ''; legend.innerHTML = ''; scoreEl.innerHTML = '';
       fit();
       return;
     }
-    var label = layout.placed.map(function (p) { return words[p.wi] + (p.dir === 0 ? '(横)' : '(縦)'); }).join('、');
+    var label = layout.placed.map(function (p) { return words[p.wi] + '(' + dirName(p.dir) + ')'; }).join(msg('comma'));
     stage.innerHTML = opsToSvg(buildOps(), animate, label);
     renderScore(animate);
     renderLegend(wordInfo());
@@ -123,12 +168,12 @@
 
   function renderScore(animate) {
     if (layout.score100 === null) {
-      scoreEl.innerHTML = '<div class="sc-sub">共通する文字がないため、採点できません。</div>';
+      scoreEl.innerHTML = '<div class="sc-sub">' + msg('noScore') + '</div>';
       return;
     }
     scoreEl.innerHTML =
-      '<span class="sr-only">スコア' + layout.score100 + '点。</span>' +
-      '<div class="sc-main" aria-hidden="true"><span class="sc-num"></span><span class="sc-unit">点</span></div>';
+      '<span class="sr-only">' + msg('scoreSr')(layout.score100) + '</span>' +
+      '<div class="sc-main" aria-hidden="true"><span class="sc-num"></span><span class="sc-unit">' + msg('unit') + '</span></div>';
     countUp(scoreEl.querySelector('.sc-num'), layout.score100, animate);
   }
 
@@ -137,8 +182,8 @@
     info = info || wordInfo();
     legend.innerHTML = words.map(function (w, i) {
       var p = info[i], sc = layout.per[i];
-      var d = p ? (p.dir === 0 ? '横' : '縦') : '未配置';
-      var label = w + ' ' + d + ' 重なり' + sc.o + '/' + sc.L + ' ' + pts(sc.pts) + '点';
+      var d = p ? dirName(p.dir) : msg('unplaced');
+      var label = msg('chip')(w, d, sc.o, sc.L, pts(sc.pts));
       return '<button type="button" class="chip' + (p ? '' : ' off') + (focus !== null && focus !== i ? ' dim' : '') + '" data-i="' + i + '" aria-pressed="' + (focus === i) + '" aria-label="' + label + '" title="' + label + '" style="--c:' + colorFor(i) + '">' +
         '<span class="sw" aria-hidden="true"></span><span class="tk">' + w + '</span><span class="dir">' + d + '</span>' +
         '<span class="pt ' + (sc.pts < 0 ? 'm3' : sc.pts >= 6 ? 'p6' : sc.pts >= 3 ? 'p3' : 'p1') + '">' + pts(sc.pts) + '</span></button>';
@@ -150,7 +195,7 @@
     if (layout) {
       var zero = layout.placed.filter(function (p) { return p.touch; }).map(function (p) { return words[p.wi]; });
       if (zero.length) {
-        out += '<p class="note">' + zero.join('、') + ' は、ほかの銘柄と重なる文字がないため、右端に寄せました（減点）。「再配置」で重なる形が見つかることがあります。</p>';
+        out += '<p class="note">' + msg('zeroNote')(zero.join(msg('comma'))) + '</p>';
       }
     }
     notes.innerHTML = out;
@@ -159,13 +204,11 @@
   function generate(animate) {
     var p = parseTickers(ta.value);
     focus = null;
-    var msgs = [], known = [], notVn = [];
+    var known = [], notVn = [];
     p.words.forEach(function (w) { if (VN[w]) known.push(w); else notVn.push(w); });
     words = known;
-    if (notVn.length) msgs.push('ベトナム株市場（HOSE・HNX・UPCoM）にないため除外しました: ' + notVn.join(', '));
-    if (p.bad.length) msgs.push('英数字2〜6文字ではないため除外しました: ' + p.bad.join(', '));
-    if (p.over) msgs.push('40銘柄までを使います');
-    hint.textContent = msgs.length ? msgs.join('。') + '。' : '';
+    hintInfo = { notVn: notVn, bad: p.bad, over: !!p.over };
+    renderHint();
     layout = buildLayout(words, pattern, false);
     render(animate);
   }
@@ -200,6 +243,16 @@
     var i = +b.getAttribute('data-i');
     focus = (focus === i) ? null : i;
     render(false);
+  });
+
+  /* 言語の切り替え */
+  langSel.addEventListener('change', function () {
+    setLang(langSel.value, true);
+    try { history.replaceState(null, '', '#' + lang); } catch (e) {}
+  });
+  window.addEventListener('hashchange', function () {
+    var m = /^#(ja|vi|en)$/.exec(location.hash);
+    if (m && m[1] !== lang) setLang(m[1], true);
   });
 
   /* 採点のしくみ */
@@ -303,13 +356,13 @@
       var f1 = pillH * 0.66, f2 = pillH * 0.36, padX = pillH * 0.62, g1 = pillH * 0.08;
       ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
       ctx.font = '900 ' + f1 + 'px "Noto Sans","Noto Sans JP",sans-serif'; var w1 = ctx.measureText(num).width;
-      ctx.font = '700 ' + f2 + 'px "Noto Sans JP","Noto Sans",sans-serif'; var w2 = ctx.measureText('点').width;
+      ctx.font = '700 ' + f2 + 'px ' + uiFont(); var w2 = ctx.measureText(msg('unit')).width;
       var pw = padX * 2 + w1 + g1 + w2, px = (W - pw) / 2, py = ly - gap - pillH, base = py + pillH / 2;
       ctx.fillStyle = th.sb; roundRectPath(ctx, px, py, pw, pillH, pillH / 2); ctx.fill();
       ctx.fillStyle = th.onsb;
       var x = px + padX;
       ctx.font = '900 ' + f1 + 'px "Noto Sans","Noto Sans JP",sans-serif'; ctx.fillText(num, x, base + f1 * 0.357); x += w1 + g1;
-      ctx.font = '700 ' + f2 + 'px "Noto Sans JP","Noto Sans",sans-serif'; ctx.fillText('点', x, base + f1 * 0.357);
+      ctx.font = '700 ' + f2 + 'px ' + uiFont(); ctx.fillText(msg('unit'), x, base + f1 * 0.357);
     }
     drawLogo(ctx, W / 2, ly, logoH);
     return new Promise(function (res) { cv.toBlob(res, 'image/png'); });
@@ -319,14 +372,14 @@
   saveBtn.addEventListener('click', function () {
     if (!layout || !dl) return;
     saveBtn.disabled = true;
-    var fontsReady = document.fonts ? Promise.all([document.fonts.load('900 64px "Noto Sans"'), document.fonts.load('800 64px "Noto Sans"'), document.fonts.load('700 32px "Noto Sans JP"', '点')]).catch(function () {}) : Promise.resolve();
+    var fontsReady = document.fonts ? Promise.all([document.fonts.load('900 64px "Noto Sans"'), document.fonts.load('800 64px "Noto Sans"'), document.fonts.load('700 32px ' + (lang === 'ja' ? '"Noto Sans JP"' : '"Noto Sans"'), msg('unit'))]).catch(function () {}) : Promise.resolve();
     fontsReady.then(makePng).then(function (blob) {
       var rv = document.querySelector('input[name="ratio"]:checked').value.replace(':', 'x');
       var d = new Date(), z = function (n) { return (n < 10 ? '0' : '') + n; };
       var stamp = d.getFullYear() + z(d.getMonth() + 1) + z(d.getDate()) + '-' + z(d.getHours()) + z(d.getMinutes()) + z(d.getSeconds());
       return dl.save({ filename: 'crosstick-' + stamp + '-' + rv + '.png', data: blob });
-    }).then(function () { say('保存しました'); }, function (e) {
-      if (e && e.code === 'declined') say(''); else say('画像を保存できませんでした');
+    }).then(function () { say(msg('saved')); }, function (e) {
+      if (e && e.code === 'declined') say(''); else say(msg('saveFail'));
     }).then(function () { saveBtn.disabled = false; });
   });
   if (window.claude && typeof window.claude.use === 'function') {
@@ -358,6 +411,7 @@
     if (document.body.classList.contains('shoot')) setShoot(false);
   });
 
+  setLang(detectLang(), false);
   ta.value = DEFAULT;
   grow();
   generate(false);

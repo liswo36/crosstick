@@ -113,6 +113,14 @@ h1.logo { margin: 0; flex: none; line-height: 0; }
 .lead { margin: 0; color: var(--on-surface-var); font-size: 1.125rem; flex: 1 1 240px; min-width: 0; }
 .hactions { display: flex; gap: 6px; margin-left: auto; }
 header .short { display: none; }
+/* 言語選択: 見た目はボタン、実体は透明なselect（押すとOSの選択画面が開く） */
+header .langbtn { position: relative; padding: 0 14px; gap: 6px; }
+header .langbtn svg { width: 22px; height: 22px; }
+.langbtn .code { letter-spacing: 0.04em; }
+.langsel { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font: inherit; }
+.langbtn:focus-within { outline: 3px solid var(--primary); outline-offset: 2px; }
+/* ベトナム語・英語はラテン文字なので Noto Sans を先に使う */
+html[lang="vi"], html[lang="en"] { --font-ui: 'Noto Sans', 'Noto Sans JP', sans-serif; }
 @media (max-width: 760px) {
   .lead { display: none; }
   header { flex-wrap: nowrap; }
@@ -123,6 +131,13 @@ header .short { display: none; }
   header .iconbtn { padding: 0; }
   .logo-svg { --lh: 44px; }
   .hactions { margin-left: auto; }
+}
+@media (max-width: 760px) {
+  /* 言語ボタンが増えた分、狭い画面ではボタンを丸いアイコンにし、ロゴを幅に合わせて少し縮める（360pxまで収まる） */
+  header { gap: 4px 8px; }
+  .logo-svg { --lh: clamp(34px, calc((100vw - 228px) / 3.925), 44px); }
+  header .langbtn { width: 48px; min-width: 48px; height: 48px; padding: 0; border-radius: 50%; }
+  .langbtn .code { display: none; }
 }
 
 /* ボタン */

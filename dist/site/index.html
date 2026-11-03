@@ -22,7 +22,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@500;700;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* Layout: ギャラリー展示。中央に大きな白いステージ（スコアのバッジを左上に浮かせる）、その下に銘柄の行、
    一番下に浮かぶ操作ドック。撮影モードでは操作を隠し、1:1・16:9・9:16の枠だけを表示する。
@@ -138,6 +138,14 @@ h1.logo { margin: 0; flex: none; line-height: 0; }
 .lead { margin: 0; color: var(--on-surface-var); font-size: 1.125rem; flex: 1 1 240px; min-width: 0; }
 .hactions { display: flex; gap: 6px; margin-left: auto; }
 header .short { display: none; }
+/* 言語選択: 見た目はボタン、実体は透明なselect（押すとOSの選択画面が開く） */
+header .langbtn { position: relative; padding: 0 14px; gap: 6px; }
+header .langbtn svg { width: 22px; height: 22px; }
+.langbtn .code { letter-spacing: 0.04em; }
+.langsel { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font: inherit; }
+.langbtn:focus-within { outline: 3px solid var(--primary); outline-offset: 2px; }
+/* ベトナム語・英語はラテン文字なので Noto Sans を先に使う */
+html[lang="vi"], html[lang="en"] { --font-ui: 'Noto Sans', 'Noto Sans JP', sans-serif; }
 @media (max-width: 760px) {
   .lead { display: none; }
   header { flex-wrap: nowrap; }
@@ -148,6 +156,13 @@ header .short { display: none; }
   header .iconbtn { padding: 0; }
   .logo-svg { --lh: 44px; }
   .hactions { margin-left: auto; }
+}
+@media (max-width: 760px) {
+  /* 言語ボタンが増えた分、狭い画面ではボタンを丸いアイコンにし、ロゴを幅に合わせて少し縮める（360pxまで収まる） */
+  header { gap: 4px 8px; }
+  .logo-svg { --lh: clamp(34px, calc((100vw - 228px) / 3.925), 44px); }
+  header .langbtn { width: 48px; min-width: 48px; height: 48px; padding: 0; border-radius: 50%; }
+  .langbtn .code { display: none; }
 }
 
 /* ボタン */
@@ -400,30 +415,39 @@ body.shoot:not(.score-on) .stage { inset: 16px 16px 90px; }
 <path d="M0 0 C9.2 8.6 14 27.2 14.9 39.5 C15.2 51.4 12.2 60.8 4.2 69.8 C-1.8 75.5 -9.6 78.2 -17.9 78.5 C-25.3 78.2 -32 75.2 -37.2 70 C-42.3 63.6 -44.3 56.3 -46.4 48.6 C-46.8 47.4 -47.1 46.2 -47.5 45 C-54.5 20.8 -54.5 20.8 -48.2 8 C-43.7 0.9 -37.3 -3 -29.4 -5.6 C-18.4 -7.6 -9.3 -5.7 0 0 Z " fill="#8BCB00" transform="translate(1250.434,655.251) scale(0.27624)"/></symbol></svg>
 <div class="app">
   <header>
-    <h1 class="logo"><svg class="logo-svg" role="img" aria-label="Crosstick（クロスティック）"><use href="#cx-logo" width="100%" height="100%"/></svg></h1>
-    <p class="lead">ベトナム株のティッカーをパズルにできる</p>
+    <h1 class="logo"><svg class="logo-svg" role="img" data-i-aria="logo" aria-label="Crosstick（クロスティック）"><use href="#cx-logo" width="100%" height="100%"/></svg></h1>
+    <p class="lead" data-i="lead">ベトナム株のティッカーをパズルにできる</p>
     <div class="hactions">
-      <button class="btn btn-tonal iconbtn" id="rulesBtn" type="button" aria-haspopup="dialog" aria-label="採点のしくみとプライバシー">
+      <label class="btn btn-tonal langbtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19"/><path d="M12 2.5c2.6 2.6 4 5.9 4 9.5s-1.4 6.9-4 9.5c-2.6-2.6-4-5.9-4-9.5s1.4-6.9 4-9.5z"/></svg>
+        <span class="code" id="langCode" aria-hidden="true">JA</span>
+        <select class="langsel" id="lang" aria-label="言語 / Ngôn ngữ / Language">
+          <option value="ja">日本語</option>
+          <option value="vi">Tiếng Việt</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+      <button class="btn btn-tonal iconbtn" id="rulesBtn" type="button" aria-haspopup="dialog" data-i-aria="rulesAria" aria-label="採点のしくみとプライバシー">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.3a2.9 2.9 0 1 1 4.4 2.5c-.9.6-1.6 1.1-1.6 2.3"/><circle cx="12" cy="17.4" r="0.6" fill="currentColor"/></svg>
       </button>
-      <button class="btn btn-tonal" id="shootBtn" type="button" aria-label="画像を保存"><span class="full">画像を保存</span><span class="short" aria-hidden="true">保存</span></button>
+      <button class="btn btn-tonal" id="shootBtn" type="button" data-i-aria="saveImage" aria-label="画像を保存"><span class="full" data-i="saveImage">画像を保存</span><span class="short" data-i="saveShort" aria-hidden="true">保存</span></button>
     </div>
     <dialog class="dlg" id="rules" aria-labelledby="rulesTitle">
       <div class="dlg-in">
-        <h2 id="rulesTitle">採点のしくみ</h2>
+        <h2 id="rulesTitle" data-i="rulesTitle">採点のしくみ</h2>
         <table>
-          <thead><tr><th scope="col">銘柄ごとの点数（ほかの銘柄と重なる文字の数）</th><th scope="col">点数</th></tr></thead>
+          <thead><tr><th scope="col" data-i="thTicker">銘柄ごとの点数（ほかの銘柄と重なる文字の数）</th><th scope="col" data-i="thPts">点数</th></tr></thead>
           <tbody>
-            <tr><td>3文字すべて</td><td>+6点</td></tr>
-            <tr><td>2文字</td><td>+3点</td></tr>
-            <tr><td>1文字</td><td>+1点</td></tr>
-            <tr><td>0文字（右端に寄せます）</td><td class="neg">−3点</td></tr>
+            <tr><td data-i="r3">3文字すべて</td><td data-i="v6">+6点</td></tr>
+            <tr><td data-i="r2">2文字</td><td data-i="v3">+3点</td></tr>
+            <tr><td data-i="r1">1文字</td><td data-i="v1">+1点</td></tr>
+            <tr><td data-i="r0">0文字（右端に寄せます）</td><td class="neg" data-i="v0">−3点</td></tr>
           </tbody>
         </table>
-        <p>総合スコアは、取りうる点数の幅の中での位置です。最低点（どの銘柄も重ならない）を0、上限点（ほかの銘柄にも出てくる文字がすべて重なる）を100として換算するので、銘柄数が多くても有利・不利になりにくい仕組みです。</p>
-        <h3>プライバシー</h3>
-        <p class="privacy">このサイトは、入力した銘柄コードや結果を含め、情報を収集・送信・保存しません。処理はすべてお使いの端末の中で行い、開くたびに初期の銘柄に戻ります。画像の保存も端末の中で作ります。なお、文字を表示するためにGoogle Fontsからフォントを読み込みます。また、サイトを配信するサーバーには、一般的なアクセスの記録が残ることがあります。</p>
-        <div class="dlg-actions"><button class="btn btn-filled" id="rulesClose" type="button">閉じる</button></div>
+        <p data-i="rulesNote">総合スコアは、取りうる点数の幅の中での位置です。最低点（どの銘柄も重ならない）を0、上限点（ほかの銘柄にも出てくる文字がすべて重なる）を100として換算するので、銘柄数が多くても有利・不利になりにくい仕組みです。</p>
+        <h3 data-i="privacyH">プライバシー</h3>
+        <p class="privacy" data-i="privacy">このサイトは、入力した銘柄コードや結果を含め、情報を収集・送信・保存しません。処理はすべてお使いの端末の中で行い、開くたびに初期の銘柄に戻ります。画像の保存も端末の中で作ります。なお、文字を表示するためにGoogle Fontsからフォントを読み込みます。また、サイトを配信するサーバーには、一般的なアクセスの記録が残ることがあります。</p>
+        <div class="dlg-actions"><button class="btn btn-filled" id="rulesClose" type="button" data-i="close">閉じる</button></div>
       </div>
     </dialog>
   </header>
@@ -437,55 +461,55 @@ body.shoot:not(.score-on) .stage { inset: 16px 16px 90px; }
       </div>
       <div class="under" id="under">
         <fieldset class="grp">
-          <legend>見た目</legend>
+          <legend data-i="look">見た目</legend>
           <div class="seg" style="--n:3">
-            <input type="radio" name="look" id="l-text" value="text" checked><label for="l-text">文字だけ</label>
-            <input type="radio" name="look" id="l-plate" value="plate"><label for="l-plate">薄グレー</label>
-            <input type="radio" name="look" id="l-tile" value="tile"><label for="l-tile">タイル</label>
+            <input type="radio" name="look" id="l-text" value="text" checked><label for="l-text" data-i="lookText">文字だけ</label>
+            <input type="radio" name="look" id="l-plate" value="plate"><label for="l-plate" data-i="lookPlate">薄グレー</label>
+            <input type="radio" name="look" id="l-tile" value="tile"><label for="l-tile" data-i="lookTile">タイル</label>
           </div>
         </fieldset>
         <fieldset class="grp">
-          <legend>重なる文字の色</legend>
+          <legend data-i="ov">重なる文字の色</legend>
           <div class="seg" style="--n:3">
-            <input type="radio" name="ov" id="o-split" value="split" checked><label for="o-split">2色</label>
-            <input type="radio" name="ov" id="o-single" value="single"><label for="o-single">単色</label>
-            <input type="radio" name="ov" id="o-black" value="black"><label for="o-black">全部黒字</label>
+            <input type="radio" name="ov" id="o-split" value="split" checked><label for="o-split" data-i="ovSplit">2色</label>
+            <input type="radio" name="ov" id="o-single" value="single"><label for="o-single" data-i="ovSingle">単色</label>
+            <input type="radio" name="ov" id="o-black" value="black"><label for="o-black" data-i="ovBlack">全部黒字</label>
           </div>
         </fieldset>
       </div>
     </div>
-    <aside class="rcol" id="rcol" aria-label="銘柄ごとの重なりと点数">
+    <aside class="rcol" id="rcol" data-i-aria="rcolAria" aria-label="銘柄ごとの重なりと点数">
       <div class="legend" id="legend"></div>
       <div id="notes"></div>
     </aside>
   </main>
 
-  <section class="dock" aria-label="入力と設定">
-    <label class="sr-only" for="tickers">ティッカー（スペース、カンマ、改行で区切る）</label>
-    <textarea id="tickers" rows="1" spellcheck="false" autocomplete="off" autocapitalize="characters" placeholder="ティッカーを入力（例: SSI CTR VCI）"></textarea>
+  <section class="dock" data-i-aria="dockAria" aria-label="入力と設定">
+    <label class="sr-only" for="tickers" data-i="tickersLabel">ティッカー（スペース、カンマ、改行で区切る）</label>
+    <textarea id="tickers" rows="1" spellcheck="false" autocomplete="off" autocapitalize="characters" data-i-ph="placeholder" placeholder="ティッカーを入力（例: SSI CTR VCI）"></textarea>
     <div class="actions">
       <button class="btn btn-vn" id="shuffle" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
-        再配置
+        <span data-i="shuffle">再配置</span>
       </button>
     </div>
     <p class="hint" id="hint" aria-live="polite"></p>
   </section>
 </div>
 
-<div class="shootbar" id="shootbar" role="toolbar" aria-label="画像を保存" hidden>
-  <span class="cap" aria-hidden="true">比率</span>
+<div class="shootbar" id="shootbar" role="toolbar" data-i-aria="saveImage" aria-label="画像を保存" hidden>
+  <span class="cap" data-i="ratio" aria-hidden="true">比率</span>
   <div class="seg" style="--n:3">
     <input type="radio" name="ratio" id="r-1" value="1:1" checked><label for="r-1">1:1</label>
     <input type="radio" name="ratio" id="r-2" value="16:9"><label for="r-2">16:9</label>
     <input type="radio" name="ratio" id="r-3" value="9:16"><label for="r-3">9:16</label>
   </div>
-  <label class="tog" for="showScore"><input type="checkbox" id="showScore" role="switch"><span class="track" aria-hidden="true"></span><span class="tl">点数を入れる</span></label>
+  <label class="tog" for="showScore"><input type="checkbox" id="showScore" role="switch"><span class="track" aria-hidden="true"></span><span class="tl" data-i="showScore">点数を入れる</span></label>
   <button class="btn btn-filled" id="saveBtn" type="button" hidden>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
-    画像を保存
+    <span data-i="saveImage">画像を保存</span>
   </button>
-  <button class="btn btn-tonal" id="shootClose" type="button">閉じる</button>
+  <button class="btn btn-tonal" id="shootClose" type="button" data-i="close">閉じる</button>
   <span class="shootmsg" id="shootMsg" role="status"></span>
 </div>
 
@@ -789,6 +813,107 @@ function buildLayout(words, pattern, clean) {
   return pool[Math.floor(rng() * pool.length)];
 }
 /*CORE_END*/
+/*
+ * 画面の文言（日本語・ベトナム語・英語）。三つの言語は同じキーを持つ（tests/i18n.test.mjs で検査）。
+ * タイトルとメタ説明は site.config.json にある（ここには置かない）。
+ * 文字列の値は、画面の部品用の文字列か、引数を取って文字列を返す関数のどちらか。
+ */
+var I18N = {
+  ja: {
+    logo: 'Crosstick（クロスティック）',
+    lead: 'ベトナム株のティッカーをパズルにできる',
+    rulesAria: '採点のしくみとプライバシー',
+    saveImage: '画像を保存', saveShort: '保存',
+    rulesTitle: '採点のしくみ',
+    thTicker: '銘柄ごとの点数（ほかの銘柄と重なる文字の数）', thPts: '点数',
+    r3: '3文字すべて', v6: '+6点', r2: '2文字', v3: '+3点', r1: '1文字', v1: '+1点',
+    r0: '0文字（右端に寄せます）', v0: '−3点',
+    rulesNote: '総合スコアは、取りうる点数の幅の中での位置です。最低点（どの銘柄も重ならない）を0、上限点（ほかの銘柄にも出てくる文字がすべて重なる）を100として換算するので、銘柄数が多くても有利・不利になりにくい仕組みです。',
+    privacyH: 'プライバシー',
+    privacy: 'このサイトは、入力した銘柄コードや結果を含め、情報を収集・送信・保存しません。処理はすべてお使いの端末の中で行い、開くたびに初期の銘柄に戻ります。画像の保存も端末の中で作ります。なお、文字を表示するためにGoogle Fontsからフォントを読み込みます。また、サイトを配信するサーバーには、一般的なアクセスの記録が残ることがあります。',
+    close: '閉じる',
+    look: '見た目', lookText: '文字だけ', lookPlate: '薄グレー', lookTile: 'タイル',
+    ov: '重なる文字の色', ovSplit: '2色', ovSingle: '単色', ovBlack: '全部黒字',
+    rcolAria: '銘柄ごとの重なりと点数', dockAria: '入力と設定',
+    tickersLabel: 'ティッカー（スペース、カンマ、改行で区切る）',
+    placeholder: 'ティッカーを入力（例: SSI CTR VCI）',
+    shuffle: '再配置', ratio: '比率', showScore: '点数を入れる',
+    empty: 'ティッカーを入力すると、ここにパズルができます。',
+    across: '横', down: '縦', unplaced: '未配置', comma: '、',
+    puzzleAria: 'Crosstick。', unit: '点',
+    noScore: '共通する文字がないため、採点できません。',
+    scoreSr: function (n) { return 'スコア' + n + '点。'; },
+    chip: function (w, d, o, L, p) { return w + ' ' + d + ' 重なり' + o + '/' + L + ' ' + p + '点'; },
+    zeroNote: function (list) { return list + ' は、ほかの銘柄と重なる文字がないため、右端に寄せました（減点）。「再配置」で重なる形が見つかることがあります。'; },
+    exNotVn: 'ベトナム株市場（HOSE・HNX・UPCoM）にないため除外しました: ',
+    exBad: '英数字2〜6文字ではないため除外しました: ',
+    over: '40銘柄までを使います', sep: '。', end: '。',
+    saved: '保存しました', saveFail: '画像を保存できませんでした'
+  },
+  vi: {
+    logo: 'Crosstick',
+    lead: 'Biến mã cổ phiếu Việt Nam thành trò chơi ô chữ',
+    rulesAria: 'Cách tính điểm và quyền riêng tư',
+    saveImage: 'Lưu hình ảnh', saveShort: 'Lưu',
+    rulesTitle: 'Cách tính điểm',
+    thTicker: 'Điểm của từng mã (số chữ cái trùng với mã khác)', thPts: 'Điểm',
+    r3: 'Trùng cả 3 chữ cái', v6: '+6 điểm', r2: 'Trùng 2 chữ cái', v3: '+3 điểm', r1: 'Trùng 1 chữ cái', v1: '+1 điểm',
+    r0: 'Không trùng chữ nào (đẩy sang mép phải)', v0: '−3 điểm',
+    rulesNote: 'Điểm tổng là vị trí của bạn trong khoảng điểm có thể đạt được. Mức thấp nhất (không mã nào trùng chữ) tính là 0, mức cao nhất (mọi chữ cái xuất hiện ở mã khác đều trùng nhau) tính là 100, nên số lượng mã nhiều hay ít cũng ít gây thuận lợi hay bất lợi.',
+    privacyH: 'Quyền riêng tư',
+    privacy: 'Trang web này không thu thập, gửi hay lưu trữ thông tin, kể cả mã cổ phiếu và kết quả bạn nhập. Mọi xử lý đều diễn ra ngay trên thiết bị của bạn, và mỗi lần mở lại trang sẽ quay về danh sách mã ban đầu. Hình ảnh cũng được tạo ngay trên thiết bị. Lưu ý: trang tải phông chữ từ Google Fonts. Ngoài ra, máy chủ phân phối trang web có thể ghi lại nhật ký truy cập thông thường.',
+    close: 'Đóng',
+    look: 'Kiểu hiển thị', lookText: 'Chỉ chữ', lookPlate: 'Nền xám nhạt', lookTile: 'Ô gạch',
+    ov: 'Màu chữ trùng nhau', ovSplit: '2 màu', ovSingle: '1 màu', ovBlack: 'Toàn chữ đen',
+    rcolAria: 'Chữ trùng và điểm của từng mã', dockAria: 'Nhập liệu và cài đặt',
+    tickersLabel: 'Mã cổ phiếu (cách nhau bằng dấu cách, dấu phẩy hoặc xuống dòng)',
+    placeholder: 'Nhập mã cổ phiếu (ví dụ: SSI CTR VCI)',
+    shuffle: 'Xếp lại', ratio: 'Tỉ lệ', showScore: 'Hiển thị điểm',
+    empty: 'Nhập mã cổ phiếu, ô chữ sẽ xuất hiện ở đây.',
+    across: 'Ngang', down: 'Dọc', unplaced: 'Chưa xếp', comma: ', ',
+    puzzleAria: 'Crosstick. ', unit: 'điểm',
+    noScore: 'Không có chữ cái chung nên không thể chấm điểm.',
+    scoreSr: function (n) { return 'Tổng điểm: ' + n + '.'; },
+    chip: function (w, d, o, L, p) { return w + ' ' + d + ' trùng ' + o + '/' + L + ' ' + p + ' điểm'; },
+    zeroNote: function (list) { return list + ' không có chữ cái nào trùng với mã khác nên được đẩy sang mép phải (bị trừ điểm). Nhấn "Xếp lại" có thể tìm được cách xếp có chữ trùng.'; },
+    exNotVn: 'Đã loại vì không có trên thị trường chứng khoán Việt Nam (HOSE, HNX, UPCoM): ',
+    exBad: 'Đã loại vì không gồm 2–6 chữ cái hoặc chữ số: ',
+    over: 'Chỉ dùng tối đa 40 mã', sep: '. ', end: '.',
+    saved: 'Đã lưu', saveFail: 'Không thể lưu hình ảnh'
+  },
+  en: {
+    logo: 'Crosstick',
+    lead: 'Turn Vietnamese stock tickers into a puzzle',
+    rulesAria: 'Scoring and privacy',
+    saveImage: 'Save image', saveShort: 'Save',
+    rulesTitle: 'How scoring works',
+    thTicker: 'Points per ticker (letters shared with other tickers)', thPts: 'Points',
+    r3: 'All 3 letters', v6: '+6 pts', r2: '2 letters', v3: '+3 pts', r1: '1 letter', v1: '+1 pt',
+    r0: '0 letters (moved to the right edge)', v0: '−3 pts',
+    rulesNote: 'The overall score is your position within the range of possible points. The lowest total (no ticker overlaps) counts as 0 and the highest (every letter that also appears in another ticker overlaps) counts as 100, so having more or fewer tickers gives no advantage or penalty.',
+    privacyH: 'Privacy',
+    privacy: 'This site does not collect, send, or store any information, including the tickers you enter and your results. Everything is processed on your own device, and the page returns to its starting tickers each time you open it. Saved images are also created on your device. Note that fonts are loaded from Google Fonts. In addition, the server that delivers this site may keep ordinary access logs.',
+    close: 'Close',
+    look: 'Style', lookText: 'Letters only', lookPlate: 'Light gray', lookTile: 'Tiles',
+    ov: 'Overlap color', ovSplit: 'Two-tone', ovSingle: 'Single', ovBlack: 'All black',
+    rcolAria: 'Overlaps and points per ticker', dockAria: 'Input and settings',
+    tickersLabel: 'Tickers (separate with spaces, commas, or line breaks)',
+    placeholder: 'Enter tickers (e.g. SSI CTR VCI)',
+    shuffle: 'Reshuffle', ratio: 'Ratio', showScore: 'Include score',
+    empty: 'Enter tickers and your puzzle will appear here.',
+    across: 'Across', down: 'Down', unplaced: 'Unplaced', comma: ', ',
+    puzzleAria: 'Crosstick. ', unit: 'pts',
+    noScore: 'No shared letters, so it cannot be scored.',
+    scoreSr: function (n) { return 'Score: ' + n + '.'; },
+    chip: function (w, d, o, L, p) { return w + ' ' + d + ' overlap ' + o + '/' + L + ' ' + p + ' pts'; },
+    zeroNote: function (list) { return list + ' share no letters with other tickers, so they were moved to the right edge (penalty). "Reshuffle" may find an arrangement with overlaps.'; },
+    exNotVn: 'Excluded (not listed in Vietnam: HOSE, HNX, UPCoM): ',
+    exBad: 'Excluded (must be 2 to 6 letters or digits): ',
+    over: 'Up to 40 tickers are used', sep: '. ', end: '.',
+    saved: 'Saved', saveFail: 'Could not save the image'
+  }
+};
+
 
 (function () {
   var DEFAULT = 'SSI CTR VCI FRT FPT DGW DPM MWG HPG VPB';
@@ -873,6 +998,51 @@ YTC
   var words = [], layout = null, pattern = 1, focus = null, timer = null;
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* 言語（日本語・ベトナム語・英語）。文言は i18n.js。選んだ言語は保存せず、URLの #ja / #vi / #en とブラウザの言語設定で決める */
+  var SITE_META = {"ja":{"title":"Crosstick（クロスティック）｜ベトナム株のティッカーをパズルにできる","description":"ベトナム株（HOSE・HNX・UPCoM）のティッカーコードを、共通する文字で交差させてカラフルなパズルにするツール。重なりの多さで採点し、画像として保存できます。入力内容は端末の外へ送信しません。"},"vi":{"title":"Crosstick | Biến mã cổ phiếu Việt Nam thành trò chơi ô chữ","description":"Công cụ ghép mã cổ phiếu Việt Nam (HOSE, HNX, UPCoM) thành ô chữ nhiều màu, giao nhau ở các chữ cái chung. Chấm điểm theo số chữ cái trùng nhau và lưu được thành hình ảnh. Nội dung bạn nhập không bị gửi ra khỏi thiết bị."},"en":{"title":"Crosstick | Turn Vietnamese stock tickers into a puzzle","description":"Cross Vietnamese stock tickers (HOSE, HNX, UPCoM) at their shared letters to make a colorful puzzle. It is scored by how much the tickers overlap, and you can save it as an image. Nothing you type leaves your device."}};
+  var lang = 'ja', hintInfo = { notVn: [], bad: [], over: false };
+  var langSel = $('lang');
+  var seo = !!document.querySelector('meta[name="description"]'); // Artifact版にはタイトル・説明のメタ情報が無い
+  function msg(k) { return I18N[lang][k]; }
+  function dirName(d) { return d === 0 ? msg('across') : msg('down'); }
+  // 画像の単位（点・điểm・pts）の字体。ベトナム語・英語ではNoto Sansを先に使う
+  function uiFont() { return lang === 'ja' ? '"Noto Sans JP","Noto Sans",sans-serif' : '"Noto Sans","Noto Sans JP",sans-serif'; }
+  function renderHint() {
+    var msgs = [];
+    if (hintInfo.notVn.length) msgs.push(msg('exNotVn') + hintInfo.notVn.join(', '));
+    if (hintInfo.bad.length) msgs.push(msg('exBad') + hintInfo.bad.join(', '));
+    if (hintInfo.over) msgs.push(msg('over'));
+    hint.textContent = msgs.length ? msgs.join(msg('sep')) + msg('end') : '';
+  }
+  function detectLang() {
+    var m = /^#(ja|vi|en)$/.exec(location.hash);
+    if (m) return m[1];
+    var ls = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'ja'];
+    for (var i = 0; i < ls.length; i++) {
+      var l = String(ls[i]).toLowerCase();
+      if (l.indexOf('ja') === 0) return 'ja';
+      if (l.indexOf('vi') === 0) return 'vi';
+      if (l.indexOf('en') === 0) return 'en';
+    }
+    return 'en';
+  }
+  function setLang(code, redraw) {
+    if (!I18N[code]) code = 'ja';
+    lang = code;
+    document.documentElement.setAttribute('lang', code);
+    document.querySelectorAll('[data-i]').forEach(function (el) { el.textContent = msg(el.getAttribute('data-i')); });
+    document.querySelectorAll('[data-i-aria]').forEach(function (el) { el.setAttribute('aria-label', msg(el.getAttribute('data-i-aria'))); });
+    document.querySelectorAll('[data-i-ph]').forEach(function (el) { el.setAttribute('placeholder', msg(el.getAttribute('data-i-ph'))); });
+    var sm = SITE_META && SITE_META[code];
+    if (seo && sm) {
+      document.title = sm.title;
+      document.querySelector('meta[name="description"]').setAttribute('content', sm.description);
+    }
+    langSel.value = code;
+    $('langCode').textContent = code.toUpperCase();
+    if (redraw) { renderHint(); render(false); }
+  }
+
   function opt(name) { return document.querySelector('input[name="' + name + '"]:checked').value; }
 
   function wordInfo() {
@@ -949,17 +1119,17 @@ YTC
       body += '</g>';
     });
     return '<svg id="puzzle" class="' + (animate ? 'anim' : '') + '" viewBox="0 0 ' + b.VW + ' ' + b.VH +
-      '" role="img" aria-label="Crosstick。' + label + '"><defs>' + defs + '</defs>' + body + '</svg>';
+      '" role="img" aria-label="' + msg('puzzleAria') + label + '"><defs>' + defs + '</defs>' + body + '</svg>';
   }
 
   function render(animate) {
     if (!layout) {
-      stage.innerHTML = '<p class="empty">ティッカーを入力すると、ここにパズルができます。</p>';
+      stage.innerHTML = '<p class="empty">' + msg('empty') + '</p>';
       notes.innerHTML = ''; legend.innerHTML = ''; scoreEl.innerHTML = '';
       fit();
       return;
     }
-    var label = layout.placed.map(function (p) { return words[p.wi] + (p.dir === 0 ? '(横)' : '(縦)'); }).join('、');
+    var label = layout.placed.map(function (p) { return words[p.wi] + '(' + dirName(p.dir) + ')'; }).join(msg('comma'));
     stage.innerHTML = opsToSvg(buildOps(), animate, label);
     renderScore(animate);
     renderLegend(wordInfo());
@@ -982,12 +1152,12 @@ YTC
 
   function renderScore(animate) {
     if (layout.score100 === null) {
-      scoreEl.innerHTML = '<div class="sc-sub">共通する文字がないため、採点できません。</div>';
+      scoreEl.innerHTML = '<div class="sc-sub">' + msg('noScore') + '</div>';
       return;
     }
     scoreEl.innerHTML =
-      '<span class="sr-only">スコア' + layout.score100 + '点。</span>' +
-      '<div class="sc-main" aria-hidden="true"><span class="sc-num"></span><span class="sc-unit">点</span></div>';
+      '<span class="sr-only">' + msg('scoreSr')(layout.score100) + '</span>' +
+      '<div class="sc-main" aria-hidden="true"><span class="sc-num"></span><span class="sc-unit">' + msg('unit') + '</span></div>';
     countUp(scoreEl.querySelector('.sc-num'), layout.score100, animate);
   }
 
@@ -996,8 +1166,8 @@ YTC
     info = info || wordInfo();
     legend.innerHTML = words.map(function (w, i) {
       var p = info[i], sc = layout.per[i];
-      var d = p ? (p.dir === 0 ? '横' : '縦') : '未配置';
-      var label = w + ' ' + d + ' 重なり' + sc.o + '/' + sc.L + ' ' + pts(sc.pts) + '点';
+      var d = p ? dirName(p.dir) : msg('unplaced');
+      var label = msg('chip')(w, d, sc.o, sc.L, pts(sc.pts));
       return '<button type="button" class="chip' + (p ? '' : ' off') + (focus !== null && focus !== i ? ' dim' : '') + '" data-i="' + i + '" aria-pressed="' + (focus === i) + '" aria-label="' + label + '" title="' + label + '" style="--c:' + colorFor(i) + '">' +
         '<span class="sw" aria-hidden="true"></span><span class="tk">' + w + '</span><span class="dir">' + d + '</span>' +
         '<span class="pt ' + (sc.pts < 0 ? 'm3' : sc.pts >= 6 ? 'p6' : sc.pts >= 3 ? 'p3' : 'p1') + '">' + pts(sc.pts) + '</span></button>';
@@ -1009,7 +1179,7 @@ YTC
     if (layout) {
       var zero = layout.placed.filter(function (p) { return p.touch; }).map(function (p) { return words[p.wi]; });
       if (zero.length) {
-        out += '<p class="note">' + zero.join('、') + ' は、ほかの銘柄と重なる文字がないため、右端に寄せました（減点）。「再配置」で重なる形が見つかることがあります。</p>';
+        out += '<p class="note">' + msg('zeroNote')(zero.join(msg('comma'))) + '</p>';
       }
     }
     notes.innerHTML = out;
@@ -1018,13 +1188,11 @@ YTC
   function generate(animate) {
     var p = parseTickers(ta.value);
     focus = null;
-    var msgs = [], known = [], notVn = [];
+    var known = [], notVn = [];
     p.words.forEach(function (w) { if (VN[w]) known.push(w); else notVn.push(w); });
     words = known;
-    if (notVn.length) msgs.push('ベトナム株市場（HOSE・HNX・UPCoM）にないため除外しました: ' + notVn.join(', '));
-    if (p.bad.length) msgs.push('英数字2〜6文字ではないため除外しました: ' + p.bad.join(', '));
-    if (p.over) msgs.push('40銘柄までを使います');
-    hint.textContent = msgs.length ? msgs.join('。') + '。' : '';
+    hintInfo = { notVn: notVn, bad: p.bad, over: !!p.over };
+    renderHint();
     layout = buildLayout(words, pattern, false);
     render(animate);
   }
@@ -1059,6 +1227,16 @@ YTC
     var i = +b.getAttribute('data-i');
     focus = (focus === i) ? null : i;
     render(false);
+  });
+
+  /* 言語の切り替え */
+  langSel.addEventListener('change', function () {
+    setLang(langSel.value, true);
+    try { history.replaceState(null, '', '#' + lang); } catch (e) {}
+  });
+  window.addEventListener('hashchange', function () {
+    var m = /^#(ja|vi|en)$/.exec(location.hash);
+    if (m && m[1] !== lang) setLang(m[1], true);
   });
 
   /* 採点のしくみ */
@@ -1162,13 +1340,13 @@ YTC
       var f1 = pillH * 0.66, f2 = pillH * 0.36, padX = pillH * 0.62, g1 = pillH * 0.08;
       ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
       ctx.font = '900 ' + f1 + 'px "Noto Sans","Noto Sans JP",sans-serif'; var w1 = ctx.measureText(num).width;
-      ctx.font = '700 ' + f2 + 'px "Noto Sans JP","Noto Sans",sans-serif'; var w2 = ctx.measureText('点').width;
+      ctx.font = '700 ' + f2 + 'px ' + uiFont(); var w2 = ctx.measureText(msg('unit')).width;
       var pw = padX * 2 + w1 + g1 + w2, px = (W - pw) / 2, py = ly - gap - pillH, base = py + pillH / 2;
       ctx.fillStyle = th.sb; roundRectPath(ctx, px, py, pw, pillH, pillH / 2); ctx.fill();
       ctx.fillStyle = th.onsb;
       var x = px + padX;
       ctx.font = '900 ' + f1 + 'px "Noto Sans","Noto Sans JP",sans-serif'; ctx.fillText(num, x, base + f1 * 0.357); x += w1 + g1;
-      ctx.font = '700 ' + f2 + 'px "Noto Sans JP","Noto Sans",sans-serif'; ctx.fillText('点', x, base + f1 * 0.357);
+      ctx.font = '700 ' + f2 + 'px ' + uiFont(); ctx.fillText(msg('unit'), x, base + f1 * 0.357);
     }
     drawLogo(ctx, W / 2, ly, logoH);
     return new Promise(function (res) { cv.toBlob(res, 'image/png'); });
@@ -1178,14 +1356,14 @@ YTC
   saveBtn.addEventListener('click', function () {
     if (!layout || !dl) return;
     saveBtn.disabled = true;
-    var fontsReady = document.fonts ? Promise.all([document.fonts.load('900 64px "Noto Sans"'), document.fonts.load('800 64px "Noto Sans"'), document.fonts.load('700 32px "Noto Sans JP"', '点')]).catch(function () {}) : Promise.resolve();
+    var fontsReady = document.fonts ? Promise.all([document.fonts.load('900 64px "Noto Sans"'), document.fonts.load('800 64px "Noto Sans"'), document.fonts.load('700 32px ' + (lang === 'ja' ? '"Noto Sans JP"' : '"Noto Sans"'), msg('unit'))]).catch(function () {}) : Promise.resolve();
     fontsReady.then(makePng).then(function (blob) {
       var rv = document.querySelector('input[name="ratio"]:checked').value.replace(':', 'x');
       var d = new Date(), z = function (n) { return (n < 10 ? '0' : '') + n; };
       var stamp = d.getFullYear() + z(d.getMonth() + 1) + z(d.getDate()) + '-' + z(d.getHours()) + z(d.getMinutes()) + z(d.getSeconds());
       return dl.save({ filename: 'crosstick-' + stamp + '-' + rv + '.png', data: blob });
-    }).then(function () { say('保存しました'); }, function (e) {
-      if (e && e.code === 'declined') say(''); else say('画像を保存できませんでした');
+    }).then(function () { say(msg('saved')); }, function (e) {
+      if (e && e.code === 'declined') say(''); else say(msg('saveFail'));
     }).then(function () { saveBtn.disabled = false; });
   });
   if (window.claude && typeof window.claude.use === 'function') {
@@ -1217,6 +1395,7 @@ YTC
     if (document.body.classList.contains('shoot')) setShoot(false);
   });
 
+  setLang(detectLang(), false);
   ta.value = DEFAULT;
   grow();
   generate(false);

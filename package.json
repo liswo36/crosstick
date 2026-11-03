@@ -1,12 +1,12 @@
 {
   "name": "crosstick",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "ベトナム株のティッカーを、共通する文字で交差させてパズルにするWebツール（クロスティック）",
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node --test tests/core.test.mjs tests/build.test.mjs",
+    "test": "node --test tests/core.test.mjs tests/build.test.mjs tests/i18n.test.mjs",
     "test:e2e": "python3 tests/e2e/run_all.py"
   },
   "engines": { "node": ">=18" }

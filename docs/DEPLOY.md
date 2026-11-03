@@ -6,7 +6,7 @@
 2. `dist/site/` の **中身**（`index.html`, `_headers`, `favicon.svg`, `favicon-32.png`, `apple-touch-icon.png`, `og.png`）をアップロードする。
    - 手動: Cloudflare ダッシュボード → Workers & Pages → `crosstick` → 新しいデプロイ → フォルダまたはzipをアップロード。zipの場合は `cd dist/site && zip -r ../crosstick-site.zip .`（フォルダごと入れない）。
    - CLI: `npx wrangler pages deploy dist/site --project-name crosstick`（要 `wrangler login`）。
-3. 公開後の確認: ページが開く／ブラウザの開発者ツールで CSP エラーが出ない／画像保存できる／SNSでURLを貼ってOGP画像が出る。
+3. 公開後の確認: ページが開く／ブラウザの開発者ツールで CSP エラーが出ない／画像保存できる／言語選択（日本語・ベトナム語・英語）で表示が切り替わる／SNSでURLを貼ってOGP画像が出る。
 
 ### GitHub連携にする場合（任意）
 Cloudflare Pages の「Git に接続」で本リポジトリを選び、ビルドコマンド `npm run build`、出力ディレクトリ `dist/site` に設定すると、push のたびに自動公開される。

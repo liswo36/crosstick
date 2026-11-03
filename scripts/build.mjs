@@ -20,6 +20,7 @@ const cfg = JSON.parse(read('site.config.json'));
 /* ---------- 部品の読み込み ---------- */
 const css = read('src/styles.css');
 const core = read('src/core.js');          // 配置・採点のエンジン（画面に依存しない。tests/ で単体テストする）
+const i18n = read('src/i18n.js');          // 画面の文言（日本語・ベトナム語・英語）
 let app = read('src/app.js');              // 画面の処理
 const logoSymbol = read('src/partials/logo-symbol.html');
 let body = read('src/body.html').replace('<!--@LOGO_SYMBOL@-->', logoSymbol);
@@ -42,7 +43,16 @@ for (let i = 0; i < codes.length; i += perLine) rows.push(codes.slice(i, i + per
 if (!app.includes('/*@VN_TICKERS@*/')) throw new Error('src/app.js に /*@VN_TICKERS@*/ がありません');
 app = app.replace('/*@VN_TICKERS@*/', rows.join('\n'));
 
-const script = `<script>\n${core}${app}</script>`;
+/* ---------- 言語ごとのタイトル・説明（site.config.json）を app.js に埋め込む ---------- */
+const siteMeta = { ja: { title: cfg.title, description: cfg.description }, ...cfg.i18n };
+for (const l of ['ja', 'vi', 'en']) {
+  if (!siteMeta[l] || !siteMeta[l].title || !siteMeta[l].description) throw new Error(`site.config.json に ${l} のタイトル・説明がありません`);
+}
+if (!app.includes('/*@SITE_META@*/null')) throw new Error('src/app.js に /*@SITE_META@*/null がありません');
+const metaJson = JSON.stringify(siteMeta).replace(/</g, '\\u003c');
+app = app.replace('/*@SITE_META@*/null', () => metaJson);
+
+const script = `<script>\n${core}\n${i18n}${app}</script>`;
 
 /* ---------- Claude Artifact 版（断片） ---------- */
 const artifact = `${headArtifact}<style>${css}</style>${body}${script}\n`;
@@ -51,7 +61,7 @@ const artifact = `${headArtifact}<style>${css}</style>${body}${script}\n`;
 const fonts = [
   '<link rel="preconnect" href="https://fonts.googleapis.com">',
   '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
-  '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@500;700;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">',
+  '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">',
 ].join('\n');
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 const T = esc(cfg.title), D = esc(cfg.description);
