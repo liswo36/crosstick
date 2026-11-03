@@ -226,10 +226,22 @@
     ta.value = n;
     try { ta.setSelectionRange(np, np); } catch (e) {}
   }
+  // 入力したティッカーだけを、このブラウザの中（localStorage）に保存する。外へは送らない。
+  // 入力欄を空にすると消える。使えない環境（プライベートモード等）では黙って何もしない。
+  var STORE_KEY = 'crosstick:tickers';
+  function loadTickers() {
+    try { var v = localStorage.getItem(STORE_KEY); return (typeof v === 'string' && v.trim()) ? v.slice(0, 600) : null; } catch (e) { return null; }
+  }
+  function saveTickers() {
+    try {
+      var v = ta.value.trim();
+      if (v) localStorage.setItem(STORE_KEY, v.slice(0, 600)); else localStorage.removeItem(STORE_KEY);
+    } catch (e) {}
+  }
   function onType() {
     normalizeInput(); grow();
     clearTimeout(timer);
-    timer = setTimeout(function () { generate(true); }, 300);
+    timer = setTimeout(function () { generate(true); saveTickers(); }, 300);
   }
   ta.addEventListener('input', function (e) { if (!e.isComposing) onType(); });
   ta.addEventListener('compositionend', onType);
@@ -412,7 +424,7 @@
   });
 
   setLang(detectLang(), false);
-  ta.value = DEFAULT;
+  ta.value = loadTickers() || DEFAULT;
   grow();
   generate(false);
 })();

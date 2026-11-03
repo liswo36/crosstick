@@ -1,6 +1,7 @@
 """画面の自動チェック（Playwright）。 実行: npm run build && python3 tests/e2e/run_all.py
 - 各画面サイズ×3言語（日本語・ベトナム語・英語）でページ全体がスクロールしない・横にはみ出さない・JSエラーが出ない
 - 言語選択で表示言語・タイトル・点数の単位が切り替わる
+- 入力したティッカーがブラウザ内に保存され、再読み込みで戻る（空にすると初期の銘柄に戻る）。通信は発生しない
 - 画像保存ダイアログが開き、PNGがダウンロードできる
 Chromeの場所は環境変数 CHROME で指定（未指定なら Playwright 同梱のChromium）。
 ネットワークに出ない環境でも動くよう、Googleフォントの<link>は取り除いて読み込む。
@@ -43,6 +44,22 @@ with sync_playwright() as p:
         print(('OK  ' if ok else 'FAIL'), 'switch', lang, got, errs)
         if not ok: fails.append('switch ' + lang)
     pg.close()
+    # 入力したティッカーの保持（このブラウザの中だけ）
+    ctx = b.new_context(viewport={'width': 1280, 'height': 720}); pg = ctx.new_page(); errs = []; reqs = []
+    pg.on('pageerror', lambda e: errs.append(str(e)))
+    pg.on('request', lambda r: reqs.append(r.url) if not r.url.startswith('file:') else None)
+    pg.goto(URL); pg.wait_for_timeout(600)
+    default = pg.input_value('#tickers')
+    pg.fill('#tickers', 'ssi vci'); pg.wait_for_timeout(700)
+    pg.reload(); pg.wait_for_timeout(600)
+    kept = pg.input_value('#tickers')
+    pg.fill('#tickers', ''); pg.wait_for_timeout(700)
+    pg.reload(); pg.wait_for_timeout(600)
+    back = pg.input_value('#tickers')
+    ok = kept == 'SSI VCI' and back == default and not errs and not reqs
+    print(('OK  ' if ok else 'FAIL'), 'persist', repr(kept), back == default, errs, reqs)
+    if not ok: fails.append('persist')
+    ctx.close()
     # 画像保存
     pg = b.new_page(viewport={'width': 1280, 'height': 720}, accept_downloads=True)
     pg.goto(URL); pg.wait_for_timeout(800)
