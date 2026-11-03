@@ -37,7 +37,7 @@ test('言語ごとのタイトル・説明と文言が埋め込まれている�
   for (const l of ['vi', 'en']) assert.ok(site.includes(JSON.stringify(cfg.i18n[l].title).slice(1, -1)), l);
   for (const h of [site, art]) assert.ok(h.includes('var I18N = {') && h.includes('id="lang"'));
 });
-test('外部通信しない（CSP の connect-src none と矛盾する fetch/XHR が無い）', () => {
+test('自前のコードは外部通信しない（fetch/XHR/WebSocket が無い。計測は Cloudflare のビーコンのみ）', () => {
   assert.ok(!/\bfetch\s*\(|XMLHttpRequest|WebSocket/.test(site));
 });
 
@@ -51,7 +51,7 @@ test('利用規約・プライバシーポリシーのページ: 未置換なし
   }
   assert.ok(t.includes('<title>利用規約') && t.includes('href="privacy.html"'));
   assert.ok(p.includes('<title>プライバシーポリシー') && p.includes('href="terms.html"'));
-  for (const w of ['localStorage', 'crosstick:tickers', 'Cloudflare', 'Google Fonts', 'fonts.gstatic.com', 'アクセス解析ツールを使っていません', 'Cookie を設定しません']) {
+  for (const w of ['localStorage', 'crosstick:tickers', 'Cloudflare', 'Google Fonts', 'fonts.gstatic.com', 'Cloudflare Web Analytics', 'Cookie を設定しません']) {
     assert.ok(p.includes(w), `privacy: ${w}`);
   }
   for (const w of ['投資の助言', '消費者契約法', '専属的合意管轄裁判所']) assert.ok(t.includes(w), `terms: ${w}`);
@@ -77,7 +77,7 @@ test('_headers: unsafe-inline が無く、インラインの script/style のハ
     for (const m of h.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)) assert.ok(csp.includes(sha(m[1])), `${f}: style`);
     assert.ok(!/\sstyle=|\son[a-z]+=/.test(h), `${f}: style/イベント属性`);
   }
-  for (const w of ['Cross-Origin-Opener-Policy: same-origin', 'Cross-Origin-Resource-Policy: same-origin', 'Strict-Transport-Security', "frame-ancestors 'none'", "connect-src 'none'"]) assert.ok(hd.includes(w), w);
+  for (const w of ['Cross-Origin-Opener-Policy: same-origin', 'Cross-Origin-Resource-Policy: same-origin', 'Strict-Transport-Security', "frame-ancestors 'none'", "connect-src 'self' https://cloudflareinsights.com", 'https://static.cloudflareinsights.com']) assert.ok(hd.includes(w), w);
   assert.ok(existsSync(join(dir, '.well-known/security.txt')) && existsSync(join(dir, 'robots.txt')));
 });
 test('ソースに style 属性・イベント属性・innerHTML への生のユーザー入力が無い', () => {

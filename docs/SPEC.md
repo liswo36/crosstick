@@ -59,10 +59,10 @@
 - 本文は `src/pages/terms.body.html`・`src/pages/privacy.body.html`。`scripts/build.mjs` が共通の枠（M3・Noto Sans・ライト／ダーク）に入れて `dist/site/terms.html`・`privacy.html` を出力する。日本語のみ（法的な文面は日本語が正）。
 - 差し込み: `site.config.json` の `operator`（`name` 運営者名、`contactChannel` 連絡手段、`contactUrl` 連絡先のURL、`enacted` 制定日、`revised` 改定日（空なら表示しない）、`court` 専属的合意管轄裁判所）。**`name` と `contactUrl` が未入力（「【」を含む）のままだとビルドが警告する。公開前に入力する。**
 - 「採点のしくみ」ダイアログから両ページへリンクする（新しいタブ）。ベトナム語・英語の画面でも日本語ページへ（リンク名に「(tiếng Nhật)」「(Japanese)」と付ける）。Artifact版にはリンクを入れない。
-- 本文に書いてあることは、コードの動作と一致させる（Cookieなし・アクセス解析なし・localStorage の保存内容・Google Fonts と Cloudflare）。仕様を変えたら本文も直す。ログの保持期間など、確認できていないことは書かない。
+- 本文に書いてあることは、コードの動作と一致させる（Cookieなし・アクセス解析は Cloudflare Web Analytics のみ・localStorage の保存内容・Google Fonts と Cloudflare）。仕様を変えたら本文も直す。ログの保持期間など、確認できていないことは書かない。
 
 ## 入力の保持
-- 入力したティッカーの文字列だけを、このブラウザの `localStorage`（キー `crosstick:tickers`、最大600文字）に保存し、次に開いたとき入力欄に戻す。外へは送らない（CSP `connect-src 'none'` のまま）。
+- 入力したティッカーの文字列だけを、このブラウザの `localStorage`（キー `crosstick:tickers`、最大600文字）に保存し、次に開いたとき入力欄に戻す。外へは送らない（自前のコードに通信は無い。CSP の `connect-src` は `'self'` と cloudflareinsights.com のみ）。
 - 保存のタイミング: 入力の300ms後（図の更新と同時）。入力欄を空にすると保存を消し、次回は初期の銘柄に戻る。
 - 保存するのは入力文字列のみ。結果・見た目の設定・言語・点数表示は保存しない。`localStorage` が使えない環境（プライベートモード等）では黙って保存をやめ、毎回初期の銘柄で始まる。
 - プライバシー文にこの保存と「空にすると消える」ことを書いてある（`src/i18n.js` の `privacy`、`src/body.html`）。
@@ -77,4 +77,4 @@
 - 狭い画面（幅760px以下）では言語ボタンは地球儀アイコンのみの丸いボタンになり、ロゴは幅に合わせて縮む（最小34px、360pxまで収まる）。
 
 ## 公開サイトの制約
-CSP: `default-src 'none'`、インラインの `<script>`／`<style>` は **SHA-256 ハッシュで許可**（`'unsafe-inline'` なし。ビルドが `dist/site/_headers` に計算して書く）、`connect-src 'none'`（外部通信なし）。許可する外部はGoogle Fontsのみ。HTML／JS は `style` 属性・イベント属性を使わない（動的な値は CSSOM の `style.setProperty`）。ほかに COOP／CORP `same-origin`、HSTS、`/.well-known/security.txt`、`robots.txt`。詳細は `public/_headers`。
+CSP: `default-src 'none'`、インラインの `<script>`／`<style>` は **SHA-256 ハッシュで許可**（`'unsafe-inline'` なし。ビルドが `dist/site/_headers` に計算して書く）、`script-src` に `static.cloudflareinsights.com`、`connect-src` に `'self'` と `cloudflareinsights.com`（Cloudflare Web Analytics のビーコン用）。許可する外部は Google Fonts と Cloudflare Web Analytics のみ。HTML／JS は `style` 属性・イベント属性を使わない（動的な値は CSSOM の `style.setProperty`）。ほかに COOP／CORP `same-origin`、HSTS、`/.well-known/security.txt`、`robots.txt`。詳細は `public/_headers`。

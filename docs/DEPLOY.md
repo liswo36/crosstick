@@ -20,3 +20,6 @@ Cloudflare Pages の「Git に接続」で本リポジトリを選び、ビル�
 ## Claude Artifact
 - Artifact: https://claude.ai/artifact/FYvFoHKYtEwchzahruowpY（capability: `downloads`）
 - `npm run build` の後、`dist/artifact.html` を Claude に渡して同じ Artifact に再公開を頼む。断片HTML（`<!doctype>`や`<html>`なし）が正しい形式。
+
+## アクセス解析（Cloudflare Web Analytics）
+ダッシュボード → Workers & Pages → `crosstick` → Metrics（または Web Analytics）→ 有効化。Pages では HTML にビーコンが自動で挿入されるため、コード側の変更は不要（CSP は `_headers` で許可済み）。見る場所: Cloudflare → Web Analytics。国別・ページ別・参照元・端末別。広告ブロッカー利用者は数に入らない。

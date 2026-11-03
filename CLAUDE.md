@@ -15,7 +15,7 @@
 
 ## 守る制約
 - 入力はVN上場の3文字コードのみ（`src/data/vn-tickers.txt` に無いコードは受け付けない）。最大40銘柄。
-- 外部へ通信しない（CSP `connect-src 'none'`）。`fetch`/XHR/WebSocket を入れない。外部読み込みは Google Fonts のみ。
+- 自前のコードは外部へ通信しない。`fetch`/XHR/WebSocket を入れない。外部読み込みは Google Fonts と Cloudflare Web Analytics（Pages の自動挿入ビーコン）のみ。CSP の許可もこの2つだけ（`script-src`／`connect-src` の cloudflareinsights）。
 - 書き出し画像: 1600² / 1920×1080 / 1080×1920。ファイル名は `crosstick-YYYYMMDD-HHMMSS-1x1|16x9|9x16.png`。点数表示は既定OFF。
 - 配置は決定的（同じ入力・同じパターンなら同じ結果）。`core.js` を変えたら `tests/core.test.mjs` を確認する。
 

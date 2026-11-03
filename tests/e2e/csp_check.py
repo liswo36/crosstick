@@ -51,6 +51,7 @@ with sync_playwright() as p:
     pg = ctx.new_page()
     errs = []
     pg.on('pageerror', lambda e: errs.append(str(e)))
+    pg.route(re.compile(r'https://(static\.)?cloudflareinsights\.com/.*'), lambda r: r.abort())
     pg.route(re.compile(r'https://fonts\.(googleapis|gstatic)\.com/.*'), lambda r: r.abort())
     for page_name in ['', 'terms', 'privacy']:
         pg.goto(BASE + page_name); pg.wait_for_timeout(600)

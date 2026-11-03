@@ -439,7 +439,7 @@ body.shoot:not(.score-on) .stage { inset: 16px 16px 90px; }
         </table>
         <p data-i="rulesNote">総合スコアは、取りうる点数の幅の中での位置です。最低点（どの銘柄も重ならない）を0、上限点（ほかの銘柄にも出てくる文字がすべて重なる）を100として換算するので、銘柄数が多くても有利・不利になりにくい仕組みです。ほかの銘柄と共通する文字が1つもない銘柄は、組み合わせられないので、満点を取れなかったものとして数え、総合スコアが下がります。</p>
         <h3 data-i="privacyH">プライバシー</h3>
-        <p class="privacy" data-i="privacy">このサイトは、入力した銘柄コードや結果を集めたり、送ったりしません。処理はすべてお使いの端末の中で行い、入力した銘柄コードだけ、次に開いたときのためにこのブラウザに保存します（入力欄を空にすると消えます）。なお、ページを開くときはGoogle Fontsからフォントを読み込み、配信にはCloudflareを使っています。そのためIPアドレスなどの通信情報はGoogleとCloudflareに届き、Cloudflareにはアクセスの記録が残ることがあります。</p>
+        <p class="privacy" data-i="privacy">このサイトは、入力した銘柄コードや結果を集めたり、送ったりしません。処理はすべてお使いの端末の中で行い、入力した銘柄コードだけ、次に開いたときのためにこのブラウザに保存します（入力欄を空にすると消えます）。なお、ページを開くときはGoogle Fontsからフォントを読み込み、配信にはCloudflareを使っています。そのためIPアドレスなどの通信情報はGoogleとCloudflareに届き、Cloudflareにはアクセスの記録が残ることがあります。また、利用状況（閲覧数・国・端末など）の集計にCloudflare Web Analyticsを使っています。入力した銘柄コードや結果は集計に含まれません。</p>
         
         <div class="dlg-actions"><button class="btn btn-filled" id="rulesClose" type="button" data-i="close">閉じる</button></div>
       </div>
@@ -826,7 +826,7 @@ var I18N = {
     r0: '0文字（右端に寄せます）', v0: '−3点',
     rulesNote: '総合スコアは、取りうる点数の幅の中での位置です。最低点（どの銘柄も重ならない）を0、上限点（ほかの銘柄にも出てくる文字がすべて重なる）を100として換算するので、銘柄数が多くても有利・不利になりにくい仕組みです。ほかの銘柄と共通する文字が1つもない銘柄は、組み合わせられないので、満点を取れなかったものとして数え、総合スコアが下がります。',
     privacyH: 'プライバシー',
-    privacy: 'このサイトは、入力した銘柄コードや結果を集めたり、送ったりしません。処理はすべてお使いの端末の中で行い、入力した銘柄コードだけ、次に開いたときのためにこのブラウザに保存します（入力欄を空にすると消えます）。なお、ページを開くときはGoogle Fontsからフォントを読み込み、配信にはCloudflareを使っています。そのためIPアドレスなどの通信情報はGoogleとCloudflareに届き、Cloudflareにはアクセスの記録が残ることがあります。',
+    privacy: 'このサイトは、入力した銘柄コードや結果を集めたり、送ったりしません。処理はすべてお使いの端末の中で行い、入力した銘柄コードだけ、次に開いたときのためにこのブラウザに保存します（入力欄を空にすると消えます）。なお、ページを開くときはGoogle Fontsからフォントを読み込み、配信にはCloudflareを使っています。そのためIPアドレスなどの通信情報はGoogleとCloudflareに届き、Cloudflareにはアクセスの記録が残ることがあります。また、利用状況（閲覧数・国・端末など）の集計にCloudflare Web Analyticsを使っています。入力した銘柄コードや結果は集計に含まれません。',
     terms: '利用規約', privacyPolicy: 'プライバシーポリシー',
     close: '閉じる',
     look: '見た目', lookText: '文字だけ', lookPlate: '薄グレー', lookTile: 'タイル',
@@ -858,7 +858,7 @@ var I18N = {
     r0: 'Không trùng chữ nào (đẩy sang mép phải)', v0: '−3 điểm',
     rulesNote: 'Điểm tổng là vị trí của bạn trong khoảng điểm có thể đạt được. Mức thấp nhất (không mã nào trùng chữ) tính là 0, mức cao nhất (mọi chữ cái xuất hiện ở mã khác đều trùng nhau) tính là 100, nên số lượng mã nhiều hay ít cũng ít gây thuận lợi hay bất lợi. Mã không có chữ cái nào chung với mã khác thì không thể ghép được, nên bị tính như chưa đạt điểm tối đa và làm giảm điểm tổng.',
     privacyH: 'Quyền riêng tư',
-    privacy: 'Trang web này không thu thập hay gửi mã cổ phiếu và kết quả bạn nhập. Mọi xử lý diễn ra ngay trên thiết bị của bạn, và chỉ các mã bạn nhập được lưu trong trình duyệt này để lần sau mở lại vẫn còn (xóa trống ô nhập để xóa). Khi mở trang, phông chữ được tải từ Google Fonts và trang được phân phối qua Cloudflare, nên thông tin kết nối như địa chỉ IP sẽ đến Google và Cloudflare, và Cloudflare có thể lưu nhật ký truy cập.',
+    privacy: 'Trang web này không thu thập hay gửi mã cổ phiếu và kết quả bạn nhập. Mọi xử lý diễn ra ngay trên thiết bị của bạn, và chỉ các mã bạn nhập được lưu trong trình duyệt này để lần sau mở lại vẫn còn (xóa trống ô nhập để xóa). Khi mở trang, phông chữ được tải từ Google Fonts và trang được phân phối qua Cloudflare, nên thông tin kết nối như địa chỉ IP sẽ đến Google và Cloudflare, và Cloudflare có thể lưu nhật ký truy cập. Chúng tôi cũng dùng Cloudflare Web Analytics để thống kê lượt xem, quốc gia, thiết bị…; mã cổ phiếu và kết quả bạn nhập không nằm trong số liệu này.',
     terms: 'Điều khoản sử dụng (tiếng Nhật)', privacyPolicy: 'Chính sách quyền riêng tư (tiếng Nhật)',
     close: 'Đóng',
     look: 'Kiểu hiển thị', lookText: 'Chỉ chữ', lookPlate: 'Nền xám nhạt', lookTile: 'Ô gạch',
@@ -890,7 +890,7 @@ var I18N = {
     r0: '0 letters (moved to the right edge)', v0: '−3 pts',
     rulesNote: 'The overall score is your position within the range of possible points. The lowest total (no ticker overlaps) counts as 0 and the highest (every letter that also appears in another ticker overlaps) counts as 100, so having more or fewer tickers gives no advantage or penalty. A ticker that shares no letters with any other ticker cannot be combined, so it counts as missing full points and lowers the overall score.',
     privacyH: 'Privacy',
-    privacy: 'This site does not collect or send the tickers you enter or your results. Everything is processed on your own device, and only the tickers you enter are saved in this browser for your next visit (empty the input box to clear them). When the page loads, fonts come from Google Fonts and the site is delivered through Cloudflare, so connection details such as your IP address reach Google and Cloudflare, and Cloudflare may keep access logs.',
+    privacy: 'This site does not collect or send the tickers you enter or your results. Everything is processed on your own device, and only the tickers you enter are saved in this browser for your next visit (empty the input box to clear them). When the page loads, fonts come from Google Fonts and the site is delivered through Cloudflare, so connection details such as your IP address reach Google and Cloudflare, and Cloudflare may keep access logs. We also use Cloudflare Web Analytics for usage statistics (views, country, device and so on); the tickers you enter and your results are not part of it.',
     terms: 'Terms of Use (Japanese)', privacyPolicy: 'Privacy Policy (Japanese)',
     close: 'Close',
     look: 'Style', lookText: 'Letters only', lookPlate: 'Light gray', lookTile: 'Tiles',

@@ -35,3 +35,4 @@
 - 狭い画面（360×640）での枠とヘッダーの重なりを修正。
 - ティッカー一覧を Vietstock の1,519件に更新。
 - セキュリティ強化: CSP から `'unsafe-inline'` を除去しインラインの script/style を SHA-256 ハッシュで許可（ビルドが `_headers` を生成）。`style` 属性を廃止（CSSOM へ）。COOP/CORP/HSTS 追加、`security.txt`・`robots.txt` 追加、`npm run test:csp`（本番と同じヘッダーで実ブラウザ検査）。
+- アクセス解析: Cloudflare Web Analytics（Pages の自動挿入）を導入。CSP に cloudflareinsights を許可、プライバシーポリシー（改定日 2026年11月4日）・アプリ内の説明（ja/vi/en）・外部送信の公表表を更新。
