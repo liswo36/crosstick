@@ -265,8 +265,9 @@ svg [fill="#cfd4d9"] { fill: var(--dim); }
 .under .seg { min-width: 0; }
 .grp legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .cap { font-size: 1.0625rem; font-weight: 700; color: var(--on-surface-var); line-height: 1.3; white-space: nowrap; }
-.hint { flex: 1 1 100%; margin: 0 6px; font-size: 1rem; color: var(--neg); font-weight: 500; }
-.hint:empty { display: none; }
+.hint { flex: 1 1 100%; margin: 0 6px; font-size: 1rem; line-height: 1.4; color: var(--neg); font-weight: 500;
+  /* 注意メッセージの場所は最初から2行ぶん確保しておく（入力中に画面が動かないように）。3行以上は中でスクロール */
+  height: 2.8em; overflow-y: auto; }
 
 /* スライドするつまみ付きのセグメント */
 .seg {

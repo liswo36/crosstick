@@ -1,6 +1,7 @@
 """画面の自動チェック（Playwright）。 実行: npm run build && python3 tests/e2e/run_all.py
 - 各画面サイズ×3言語（日本語・ベトナム語・英語）でページ全体がスクロールしない・横にはみ出さない・JSエラーが出ない
 - 言語選択で表示言語・タイトル・点数の単位が切り替わる
+- 除外メッセージ（注意）が出ても、入力欄・ボタン・盤面の位置と大きさが動かない（メッセージの場所は最初から確保）
 - 入力したティッカーがブラウザ内に保存され、再読み込みで戻る（空にすると初期の銘柄に戻る）。通信は発生しない
 - 画像保存ダイアログが開き、PNGがダウンロードできる
 Chromeの場所は環境変数 CHROME で指定（未指定なら Playwright 同梱のChromium）。
@@ -44,6 +45,20 @@ with sync_playwright() as p:
         print(('OK  ' if ok else 'FAIL'), 'switch', lang, got, errs)
         if not ok: fails.append('switch ' + lang)
     pg.close()
+    # 注意メッセージが出ても画面が動かない（入力欄は同じ行数のまま比べる）
+    for w, h in [(1280, 720), (390, 780), (360, 640)]:
+        pg = b.new_page(viewport={'width': w, 'height': h}); errs = []
+        pg.on('pageerror', lambda e: errs.append(str(e)))
+        pg.goto(URL + '#ja'); pg.wait_for_timeout(700)
+        snap = lambda: pg.evaluate("""()=>['tickers','shuffle','board','hint'].map(i=>{const r=document.getElementById(i).getBoundingClientRect();return [Math.round(r.top),Math.round(r.height)]})""")
+        pg.fill('#tickers', 'SSI CTR VCI'); pg.wait_for_timeout(700)
+        a = snap(); had_a = pg.inner_text('#hint').strip()
+        pg.fill('#tickers', 'SSI CTR ZZZ'); pg.wait_for_timeout(700)
+        c = snap(); had_c = pg.inner_text('#hint').strip()
+        ok = a == c and not had_a and bool(had_c) and not errs
+        print(('OK  ' if ok else 'FAIL'), 'hint-stable', f'{w}x{h}', a == c, repr(had_c)[:40], errs)
+        if not ok: fails.append(f'hint-stable {w}x{h}')
+        pg.close()
     # 入力したティッカーの保持（このブラウザの中だけ）
     ctx = b.new_context(viewport={'width': 1280, 'height': 720}); pg = ctx.new_page(); errs = []; reqs = []
     pg.on('pageerror', lambda e: errs.append(str(e)))
