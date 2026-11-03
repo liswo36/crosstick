@@ -103,7 +103,7 @@
           items.push({ k: 'rect', x: x0 + po, y: y0 + po, w: pt, h: pt, r: s * 0.16, f: '@plate' });
         }
         if (black) {
-          // 全部黒字: 色は板やタイルに任せ、文字はすべて黒（ダークテーマでは明るい文字色）にする
+          // 黒文字: 色は板やタイルに任せ、文字はすべて黒（ダークテーマでは明るい文字色）にする
           var on = focus === null || c.owners.some(function (q) { return q.wi === focus; });
           items.push({ k: 'text', x: cx, y: ty2, fs: f2, f: on ? '@ink' : GREY, w: 900, ch: c.ch });
         } else {

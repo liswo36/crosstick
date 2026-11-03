@@ -65,7 +65,7 @@ test('プライバシー文はどの言語でも「アクセスの記録（ロ�
   assert.ok(I18N.ja.privacy.includes('アクセスの記録が残ることがあります'));
   assert.ok(I18N.vi.privacy.includes('nhật ký truy cập'));
   assert.ok(I18N.en.privacy.includes('access logs'));
-  for (const l of LANGS) assert.ok(/Google Fonts/.test(I18N[l].privacy), l);
+  for (const l of LANGS) assert.ok(/Google Fonts/.test(I18N[l].privacy) && /Cloudflare/.test(I18N[l].privacy), l);
 });
 
 test('site.config.json にベトナム語・英語のタイトルと説明がある', () => {
