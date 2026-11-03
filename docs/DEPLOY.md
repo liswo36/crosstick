@@ -11,6 +11,9 @@
 ### GitHub連携にする場合（任意）
 Cloudflare Pages の「Git に接続」で本リポジトリを選び、ビルドコマンド `npm run build`、出力ディレクトリ `dist/site` に設定すると、push のたびに自動公開される。
 
+### 共有用画像 og.png のタグラインを変えるとき
+`python3 scripts/og-tagline.py "1行目" "2行目"`（要 Pillow）。`public/og.png` の左下の文字だけを差し替える。タイトルを変えたら `site.config.json` も直す。公開後、SNS側のOGPキャッシュが古い画像を出すことがある。
+
 ### URLを変えたら
 独自ドメインにしたときは `site.config.json` の `siteUrl` を直し（OGPの `og:url` / `og:image` に使われる）、再ビルド・再公開する。
 

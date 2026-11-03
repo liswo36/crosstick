@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Crosstick（クロスティック）｜ベトナム株のティッカーをパズルにできる</title>
-<meta name="description" content="ベトナム株（HOSE・HNX・UPCoM）のティッカーコードを、共通する文字で交差させてカラフルなパズルにするツール。重なりの多さで採点し、画像として保存できます。入力内容は端末の外へ送信しません。">
+<title>Crosstick（クロスティック）｜ベトナム株のティッカーを楽しく見せ合おう</title>
+<meta name="description" content="ベトナム株（HOSE・HNX・UPCoM）のティッカーコードを、共通する文字で交差させたカラフルな図にするツール。重なりの多さで点数も出て、画像として保存して友達と見せ合えます。入力内容は端末の外へ送信しません。">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f4f8fc" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0d1215" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Crosstick">
-<meta property="og:title" content="Crosstick（クロスティック）｜ベトナム株のティッカーをパズルにできる">
-<meta property="og:description" content="ベトナム株（HOSE・HNX・UPCoM）のティッカーコードを、共通する文字で交差させてカラフルなパズルにするツール。重なりの多さで採点し、画像として保存できます。入力内容は端末の外へ送信しません。">
+<meta property="og:title" content="Crosstick（クロスティック）｜ベトナム株のティッカーを楽しく見せ合おう">
+<meta property="og:description" content="ベトナム株（HOSE・HNX・UPCoM）のティッカーコードを、共通する文字で交差させたカラフルな図にするツール。重なりの多さで点数も出て、画像として保存して友達と見せ合えます。入力内容は端末の外へ送信しません。">
 <meta property="og:url" content="https://crosstick.pages.dev/">
 <meta property="og:image" content="https://crosstick.pages.dev/og.png">
 <meta property="og:image:width" content="1200">
@@ -423,7 +423,7 @@ body.shoot:not(.score-on) .stage { inset: 16px 16px 90px; }
 <div class="app">
   <header>
     <h1 class="logo"><svg class="logo-svg" role="img" data-i-aria="logo" aria-label="Crosstick（クロスティック）"><use href="#cx-logo" width="100%" height="100%"/></svg></h1>
-    <p class="lead" data-i="lead">ベトナム株のティッカーをパズルにできる</p>
+    <p class="lead" data-i="lead">ベトナム株のティッカーを楽しく見せ合おう</p>
     <div class="hactions">
       <label class="btn btn-tonal langbtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19"/><path d="M12 2.5c2.6 2.6 4 5.9 4 9.5s-1.4 6.9-4 9.5c-2.6-2.6-4-5.9-4-9.5s1.4-6.9 4-9.5z"/></svg>
@@ -829,7 +829,7 @@ function buildLayout(words, pattern, clean) {
 var I18N = {
   ja: {
     logo: 'Crosstick（クロスティック）',
-    lead: 'ベトナム株のティッカーをパズルにできる',
+    lead: 'ベトナム株のティッカーを楽しく見せ合おう',
     rulesAria: '採点のしくみとプライバシー',
     saveImage: '画像を保存', saveShort: '保存',
     rulesTitle: '採点のしくみ',
@@ -847,7 +847,7 @@ var I18N = {
     tickersLabel: 'ティッカー（スペース、カンマ、改行で区切る）',
     placeholder: 'ティッカーを入力（例: SSI CTR VCI）',
     shuffle: '再配置', ratio: '比率', showScore: '点数を入れる',
-    empty: 'ティッカーを入力すると、ここにパズルができます。',
+    empty: 'ティッカーを入力すると、ここに図ができます。',
     across: '横', down: '縦', unplaced: '未配置', comma: '、',
     puzzleAria: 'Crosstick。', unit: '点',
     noScore: '共通する文字がないため、採点できません。',
@@ -861,7 +861,7 @@ var I18N = {
   },
   vi: {
     logo: 'Crosstick',
-    lead: 'Biến mã cổ phiếu Việt Nam thành trò chơi ô chữ',
+    lead: 'Cùng nhau khoe mã cổ phiếu Việt Nam thật vui',
     rulesAria: 'Cách tính điểm và quyền riêng tư',
     saveImage: 'Lưu hình ảnh', saveShort: 'Lưu',
     rulesTitle: 'Cách tính điểm',
@@ -879,7 +879,7 @@ var I18N = {
     tickersLabel: 'Mã cổ phiếu (cách nhau bằng dấu cách, dấu phẩy hoặc xuống dòng)',
     placeholder: 'Nhập mã cổ phiếu (ví dụ: SSI CTR VCI)',
     shuffle: 'Xếp lại', ratio: 'Tỉ lệ', showScore: 'Hiển thị điểm',
-    empty: 'Nhập mã cổ phiếu, ô chữ sẽ xuất hiện ở đây.',
+    empty: 'Nhập mã cổ phiếu, hình ghép sẽ xuất hiện ở đây.',
     across: 'Ngang', down: 'Dọc', unplaced: 'Chưa xếp', comma: ', ',
     puzzleAria: 'Crosstick. ', unit: 'điểm',
     noScore: 'Không có chữ cái chung nên không thể chấm điểm.',
@@ -893,7 +893,7 @@ var I18N = {
   },
   en: {
     logo: 'Crosstick',
-    lead: 'Turn Vietnamese stock tickers into a puzzle',
+    lead: 'Have fun showing off your Vietnamese stock tickers',
     rulesAria: 'Scoring and privacy',
     saveImage: 'Save image', saveShort: 'Save',
     rulesTitle: 'How scoring works',
@@ -911,7 +911,7 @@ var I18N = {
     tickersLabel: 'Tickers (separate with spaces, commas, or line breaks)',
     placeholder: 'Enter tickers (e.g. SSI CTR VCI)',
     shuffle: 'Reshuffle', ratio: 'Ratio', showScore: 'Include score',
-    empty: 'Enter tickers and your puzzle will appear here.',
+    empty: 'Enter tickers and your diagram will appear here.',
     across: 'Across', down: 'Down', unplaced: 'Unplaced', comma: ', ',
     puzzleAria: 'Crosstick. ', unit: 'pts',
     noScore: 'No shared letters, so it cannot be scored.',
@@ -1010,7 +1010,7 @@ YTC
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* 言語（日本語・ベトナム語・英語）。文言は i18n.js。選んだ言語は保存せず、URLの #ja / #vi / #en とブラウザの言語設定で決める */
-  var SITE_META = {"ja":{"title":"Crosstick（クロスティック）｜ベトナム株のティッカーをパズルにできる","description":"ベトナム株（HOSE・HNX・UPCoM）のティッカーコードを、共通する文字で交差させてカラフルなパズルにするツール。重なりの多さで採点し、画像として保存できます。入力内容は端末の外へ送信しません。"},"vi":{"title":"Crosstick | Biến mã cổ phiếu Việt Nam thành trò chơi ô chữ","description":"Công cụ ghép mã cổ phiếu Việt Nam (HOSE, HNX, UPCoM) thành ô chữ nhiều màu, giao nhau ở các chữ cái chung. Chấm điểm theo số chữ cái trùng nhau và lưu được thành hình ảnh. Nội dung bạn nhập không bị gửi ra khỏi thiết bị."},"en":{"title":"Crosstick | Turn Vietnamese stock tickers into a puzzle","description":"Cross Vietnamese stock tickers (HOSE, HNX, UPCoM) at their shared letters to make a colorful puzzle. It is scored by how much the tickers overlap, and you can save it as an image. Nothing you type leaves your device."}};
+  var SITE_META = {"ja":{"title":"Crosstick（クロスティック）｜ベトナム株のティッカーを楽しく見せ合おう","description":"ベトナム株（HOSE・HNX・UPCoM）のティッカーコードを、共通する文字で交差させたカラフルな図にするツール。重なりの多さで点数も出て、画像として保存して友達と見せ合えます。入力内容は端末の外へ送信しません。"},"vi":{"title":"Crosstick | Cùng nhau khoe mã cổ phiếu Việt Nam thật vui","description":"Công cụ ghép mã cổ phiếu Việt Nam (HOSE, HNX, UPCoM) thành hình nhiều màu, giao nhau ở các chữ cái chung. Có chấm điểm theo số chữ cái trùng nhau, và bạn có thể lưu thành hình ảnh để khoe với bạn bè. Nội dung bạn nhập không bị gửi ra khỏi thiết bị."},"en":{"title":"Crosstick | Have fun showing off your Vietnamese stock tickers","description":"Cross Vietnamese stock tickers (HOSE, HNX, UPCoM) at their shared letters to make a colorful diagram. It is scored by how much the tickers overlap, and you can save it as an image to show your friends. Nothing you type leaves your device."}};
   var lang = 'ja', hintInfo = { notVn: [], bad: [], over: false };
   var langSel = $('lang');
   var seo = !!document.querySelector('meta[name="description"]'); // Artifact版にはタイトル・説明のメタ情報が無い

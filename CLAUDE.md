@@ -1,6 +1,6 @@
 # CLAUDE.md — Crosstick
 
-ベトナム株ティッカーのパズルツール。単一HTMLにビルドされる静的サイト。詳細は README.md と docs/。
+ベトナム株ティッカーを交差させた図にして見せ合うツール。単一HTMLにビルドされる静的サイト。詳細は README.md と docs/。
 
 ## 作業の基本
 - 変更は `src/`・`public/`・`site.config.json` に加え、`npm run build` → `npm test` を通す。`dist/` は生成物なので手で編集しない（ただしコミットには含める）。

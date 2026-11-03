@@ -6,7 +6,7 @@
 var I18N = {
   ja: {
     logo: 'Crosstick（クロスティック）',
-    lead: 'ベトナム株のティッカーをパズルにできる',
+    lead: 'ベトナム株のティッカーを楽しく見せ合おう',
     rulesAria: '採点のしくみとプライバシー',
     saveImage: '画像を保存', saveShort: '保存',
     rulesTitle: '採点のしくみ',
@@ -24,7 +24,7 @@ var I18N = {
     tickersLabel: 'ティッカー（スペース、カンマ、改行で区切る）',
     placeholder: 'ティッカーを入力（例: SSI CTR VCI）',
     shuffle: '再配置', ratio: '比率', showScore: '点数を入れる',
-    empty: 'ティッカーを入力すると、ここにパズルができます。',
+    empty: 'ティッカーを入力すると、ここに図ができます。',
     across: '横', down: '縦', unplaced: '未配置', comma: '、',
     puzzleAria: 'Crosstick。', unit: '点',
     noScore: '共通する文字がないため、採点できません。',
@@ -38,7 +38,7 @@ var I18N = {
   },
   vi: {
     logo: 'Crosstick',
-    lead: 'Biến mã cổ phiếu Việt Nam thành trò chơi ô chữ',
+    lead: 'Cùng nhau khoe mã cổ phiếu Việt Nam thật vui',
     rulesAria: 'Cách tính điểm và quyền riêng tư',
     saveImage: 'Lưu hình ảnh', saveShort: 'Lưu',
     rulesTitle: 'Cách tính điểm',
@@ -56,7 +56,7 @@ var I18N = {
     tickersLabel: 'Mã cổ phiếu (cách nhau bằng dấu cách, dấu phẩy hoặc xuống dòng)',
     placeholder: 'Nhập mã cổ phiếu (ví dụ: SSI CTR VCI)',
     shuffle: 'Xếp lại', ratio: 'Tỉ lệ', showScore: 'Hiển thị điểm',
-    empty: 'Nhập mã cổ phiếu, ô chữ sẽ xuất hiện ở đây.',
+    empty: 'Nhập mã cổ phiếu, hình ghép sẽ xuất hiện ở đây.',
     across: 'Ngang', down: 'Dọc', unplaced: 'Chưa xếp', comma: ', ',
     puzzleAria: 'Crosstick. ', unit: 'điểm',
     noScore: 'Không có chữ cái chung nên không thể chấm điểm.',
@@ -70,7 +70,7 @@ var I18N = {
   },
   en: {
     logo: 'Crosstick',
-    lead: 'Turn Vietnamese stock tickers into a puzzle',
+    lead: 'Have fun showing off your Vietnamese stock tickers',
     rulesAria: 'Scoring and privacy',
     saveImage: 'Save image', saveShort: 'Save',
     rulesTitle: 'How scoring works',
@@ -88,7 +88,7 @@ var I18N = {
     tickersLabel: 'Tickers (separate with spaces, commas, or line breaks)',
     placeholder: 'Enter tickers (e.g. SSI CTR VCI)',
     shuffle: 'Reshuffle', ratio: 'Ratio', showScore: 'Include score',
-    empty: 'Enter tickers and your puzzle will appear here.',
+    empty: 'Enter tickers and your diagram will appear here.',
     across: 'Across', down: 'Down', unplaced: 'Unplaced', comma: ', ',
     puzzleAria: 'Crosstick. ', unit: 'pts',
     noScore: 'No shared letters, so it cannot be scored.',

@@ -19,7 +19,7 @@ tmp = pathlib.Path(tempfile.mkdtemp()) / 'page.html'
 tmp.write_text(SRC, encoding='utf8')
 URL = tmp.as_uri()
 SIZES = [(1280, 720), (1440, 900), (1024, 640), (390, 780), (390, 700), (360, 640)]
-LANGS = [('ja', '点', 'ベトナム株'), ('vi', 'điểm', 'Biến mã'), ('en', 'pts', 'Turn Vietnamese')]
+LANGS = [('ja', '点', 'ベトナム株'), ('vi', 'điểm', 'Cùng nhau khoe'), ('en', 'pts', 'Have fun showing off')]
 fails = []
 
 with sync_playwright() as p:

@@ -1,16 +1,16 @@
 {
   "name": "Crosstick",
   "siteUrl": "https://crosstick.pages.dev/",
-  "title": "Crosstick（クロスティック）｜ベトナム株のティッカーをパズルにできる",
-  "description": "ベトナム株（HOSE・HNX・UPCoM）のティッカーコードを、共通する文字で交差させてカラフルなパズルにするツール。重なりの多さで採点し、画像として保存できます。入力内容は端末の外へ送信しません。",
+  "title": "Crosstick（クロスティック）｜ベトナム株のティッカーを楽しく見せ合おう",
+  "description": "ベトナム株（HOSE・HNX・UPCoM）のティッカーコードを、共通する文字で交差させたカラフルな図にするツール。重なりの多さで点数も出て、画像として保存して友達と見せ合えます。入力内容は端末の外へ送信しません。",
   "i18n": {
     "vi": {
-      "title": "Crosstick | Biến mã cổ phiếu Việt Nam thành trò chơi ô chữ",
-      "description": "Công cụ ghép mã cổ phiếu Việt Nam (HOSE, HNX, UPCoM) thành ô chữ nhiều màu, giao nhau ở các chữ cái chung. Chấm điểm theo số chữ cái trùng nhau và lưu được thành hình ảnh. Nội dung bạn nhập không bị gửi ra khỏi thiết bị."
+      "title": "Crosstick | Cùng nhau khoe mã cổ phiếu Việt Nam thật vui",
+      "description": "Công cụ ghép mã cổ phiếu Việt Nam (HOSE, HNX, UPCoM) thành hình nhiều màu, giao nhau ở các chữ cái chung. Có chấm điểm theo số chữ cái trùng nhau, và bạn có thể lưu thành hình ảnh để khoe với bạn bè. Nội dung bạn nhập không bị gửi ra khỏi thiết bị."
     },
     "en": {
-      "title": "Crosstick | Turn Vietnamese stock tickers into a puzzle",
-      "description": "Cross Vietnamese stock tickers (HOSE, HNX, UPCoM) at their shared letters to make a colorful puzzle. It is scored by how much the tickers overlap, and you can save it as an image. Nothing you type leaves your device."
+      "title": "Crosstick | Have fun showing off your Vietnamese stock tickers",
+      "description": "Cross Vietnamese stock tickers (HOSE, HNX, UPCoM) at their shared letters to make a colorful diagram. It is scored by how much the tickers overlap, and you can save it as an image to show your friends. Nothing you type leaves your device."
     }
   },
   "themeColorLight": "#f4f8fc",
