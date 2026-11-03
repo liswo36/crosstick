@@ -1,0 +1,8 @@
+{
+  "name": "Crosstick",
+  "siteUrl": "https://crosstick.pages.dev/",
+  "title": "Crosstick（クロスティック）｜ベトナム株のティッカーをパズルにできる",
+  "description": "ベトナム株（HOSE・HNX・UPCoM）のティッカーコードを、共通する文字で交差させてカラフルなパズルにするツール。重なりの多さで採点し、画像として保存できます。入力内容は端末の外へ送信しません。",
+  "themeColorLight": "#f4f8fc",
+  "themeColorDark": "#0d1215"
+}

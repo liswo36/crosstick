@@ -1,0 +1,1227 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Crosstick（クロスティック）｜ベトナム株のティッカーをパズルにできる</title>
+<meta name="description" content="ベトナム株（HOSE・HNX・UPCoM）のティッカーコードを、共通する文字で交差させてカラフルなパズルにするツール。重なりの多さで採点し、画像として保存できます。入力内容は端末の外へ送信しません。">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f4f8fc" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1215" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Crosstick">
+<meta property="og:title" content="Crosstick（クロスティック）｜ベトナム株のティッカーをパズルにできる">
+<meta property="og:description" content="ベトナム株（HOSE・HNX・UPCoM）のティッカーコードを、共通する文字で交差させてカラフルなパズルにするツール。重なりの多さで採点し、画像として保存できます。入力内容は端末の外へ送信しません。">
+<meta property="og:url" content="https://crosstick.pages.dev/">
+<meta property="og:image" content="https://crosstick.pages.dev/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@500;700;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: ギャラリー展示。中央に大きな白いステージ（スコアのバッジを左上に浮かせる）、その下に銘柄の行、
+   一番下に浮かぶ操作ドック。撮影モードでは操作を隠し、1:1・16:9・9:16の枠だけを表示する。
+   配色: UIはMD3のブルー系。パズルの文字色はチャート配色テンプレート(11色)をそのまま使う。 */
+:root {
+  --bg: #f4f8fc;
+  --surface: #ffffff;
+  --on-surface: #171c20;
+  --on-surface-var: #41484d;
+  --outline: #71787e;
+  --outline-var: #d3dae0;
+  --primary: #00668a;
+  --on-primary: #ffffff;
+  --primary-container: #c5e8ff;
+  --on-primary-container: #001e2d;
+  --score-bg: #e4e7eb;
+  --on-score: #171c20;
+  --p1: #587481; --p3: #00707f; --p6: #0b4fd0; --m3: #c0390a;
+  --p1-on: #46606d; --p3-on: #00606f; --p6-on: #0b4fd0; --m3-on: #a33400;
+  --seg-bg: #e6edf2;
+  --stage: #ffffff;
+  --plate: #eef1f4;
+  --dim: #cfd4d9;
+  --neg: #ba1a1a;
+  --note-bg: #fff3d6;
+  --note-fg: #4a3500;
+  --shadow: 0 1px 2px rgba(20, 40, 60, 0.06), 0 16px 40px rgba(20, 40, 60, 0.10);
+  --shadow-sm: 0 1px 2px rgba(20, 40, 60, 0.08), 0 6px 18px rgba(20, 40, 60, 0.10);
+  --font-ui: 'Noto Sans JP', 'Noto Sans', sans-serif;
+  --font-glyph: 'Noto Sans', 'Noto Sans JP', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1215;
+    --surface: #171c20;
+    --on-surface: #dfe3e7;
+    --on-surface-var: #c1c7ce;
+    --outline: #8b9297;
+    --outline-var: #2f373d;
+    --primary: #7bd0ff;
+    --on-primary: #00354a;
+    --primary-container: #004c69;
+    --on-primary-container: #c5e8ff;
+    --score-bg: #2b3238;
+    --on-score: #e9edf0;
+    --p1: #a9bfca; --p3: #5fd8e8; --p6: #8cb4ff; --m3: #ffa07a;
+    --p1-on: #a9bfca; --p3-on: #5fd8e8; --p6-on: #8cb4ff; --m3-on: #ffa07a;
+    --seg-bg: #252c32;
+    --stage: #101417;
+    --plate: #1f262b;
+    --dim: #3b454c;
+    --neg: #ffb4ab;
+    --note-bg: #4a3a10;
+    --note-fg: #ffe9b3;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 16px 40px rgba(0, 0, 0, 0.45);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5), 0 6px 18px rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1215;
+  --surface: #171c20;
+  --on-surface: #dfe3e7;
+  --on-surface-var: #c1c7ce;
+  --outline: #8b9297;
+  --outline-var: #2f373d;
+  --primary: #7bd0ff;
+  --on-primary: #00354a;
+  --primary-container: #004c69;
+  --on-primary-container: #c5e8ff;
+  --score-bg: #2b3238;
+  --on-score: #e9edf0;
+  --p1: #a9bfca; --p3: #5fd8e8; --p6: #8cb4ff; --m3: #ffa07a;
+  --p1-on: #a9bfca; --p3-on: #5fd8e8; --p6-on: #8cb4ff; --m3-on: #ffa07a;
+  --seg-bg: #252c32;
+  --stage: #101417;
+  --plate: #1f262b;
+  --dim: #3b454c;
+  --neg: #ffb4ab;
+  --note-bg: #4a3a10;
+  --note-fg: #ffe9b3;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 16px 40px rgba(0, 0, 0, 0.45);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5), 0 6px 18px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  display: flex; flex-direction: column;
+  background: var(--bg);
+  color: var(--on-surface);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px;
+}
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.app {
+  flex: 1 1 auto; min-height: 0; width: 100%; max-width: 1120px; margin: 0 auto;
+  display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px;
+}
+
+.app > header { grid-row: 1; } .app > .board { grid-row: 2; } .app > .dock { grid-row: 3; }
+/* ヘッダー */
+header { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; }
+h1.logo { margin: 0; flex: none; line-height: 0; }
+.logo-svg { --lh: 60px; display: block; height: var(--lh); width: calc(var(--lh) * 3.925); }
+.lead { margin: 0; color: var(--on-surface-var); font-size: 1.125rem; flex: 1 1 240px; min-width: 0; }
+.hactions { display: flex; gap: 6px; margin-left: auto; }
+header .short { display: none; }
+@media (max-width: 760px) {
+  .lead { display: none; }
+  header { flex-wrap: nowrap; }
+  .hactions { flex: none; }
+    header .full { display: none; }
+  header .short { display: inline; }
+  header .btn { padding: 0 14px; }
+  header .iconbtn { padding: 0; }
+  .logo-svg { --lh: 44px; }
+  .hactions { margin-left: auto; }
+}
+
+/* ボタン */
+.btn {
+  min-height: 44px; padding: 0 20px; border-radius: 22px; border: 0;
+  font: 700 1.125rem/1 var(--font-ui); cursor: pointer; white-space: nowrap;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  transition: filter 0.15s, transform 0.15s;
+}
+.btn svg { width: 20px; height: 20px; flex: none; }
+.btn-filled { background: var(--primary); color: var(--on-primary); }
+/* ベトナム国旗の赤 */
+.btn-vn { background: #da251d; color: #ffffff; min-height: 54px; padding: 0 30px; border-radius: 27px; font-size: 1.3125rem; letter-spacing: 0.04em; }
+.btn-vn svg { width: 24px; height: 24px; }
+.btn-tonal { background: var(--primary-container); color: var(--on-primary-container); }
+.btn-text { background: transparent; color: var(--primary); padding: 0 14px; }
+.btn:hover { filter: brightness(1.06); }
+.btn:active { transform: scale(0.97); }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+/* 盤面 */
+.board {
+  min-height: 0; width: 100%; max-width: 1000px; margin: 0 auto;
+  display: flex; justify-content: center; align-items: flex-start; gap: 16px;
+}
+.lcol { flex: none; width: max(var(--sq, 360px), 320px); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.frame {
+  position: relative; width: var(--sq, 360px); aspect-ratio: var(--ar, 1);
+  background: var(--stage); border: 1px solid var(--outline-var); border-radius: 32px;
+  box-shadow: var(--shadow); overflow: hidden;
+}
+.stage { position: absolute; inset: 66px 16px 16px; display: grid; place-items: center; }
+svg [fill="#cfd4d9"] { fill: var(--dim); }
+.under { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.rcol { flex: 1 1 auto; min-width: 220px; max-width: 300px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+#puzzle { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.g { font-family: var(--font-glyph); font-weight: 900; }
+.g.t { font-weight: 800; }
+.plate { fill: var(--plate); }
+.empty { margin: 0; color: var(--on-surface-var); text-align: center; padding: 0 16px; }
+
+.badge {
+  position: absolute; z-index: 2; left: 14px; top: 14px;
+  display: flex; align-items: center; gap: 4px 14px;
+  background: var(--score-bg); color: var(--on-score);
+  border-radius: 26px; padding: 6px 18px 6px 16px;
+}
+.badge:empty { display: none; }
+.sc-main { display: flex; align-items: baseline; gap: 3px; }
+.sc-num { font: 900 2.5rem/1 var(--font-glyph); font-variant-numeric: tabular-nums; min-width: 1.2em; text-align: right; }
+.sc-unit { font-size: 1.1875rem; font-weight: 700; }
+.sc-sub { font-size: 1rem; line-height: 1.3; }
+
+.note { margin: 0; padding: 8px 14px; border-radius: 14px; background: var(--note-bg); color: var(--note-fg); font-size: 1rem; line-height: 1.5; }
+.note + .note { margin-top: 6px; }
+#notes:empty { display: none; }
+
+.legend { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 4px; scrollbar-width: thin; }
+.chip {
+  min-height: 46px; padding: 0 16px 0 14px; border-radius: 23px;
+  border: 1.5px solid var(--outline-var); background: var(--surface); color: var(--on-surface);
+  display: flex; align-items: center; gap: 8px; cursor: pointer; width: 100%; flex: none;
+  font-family: var(--font-ui);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.2s, border-color 0.2s;
+}
+.chip:hover { box-shadow: var(--shadow-sm); border-color: var(--outline); }
+.chip .sw { width: 14px; height: 14px; border-radius: 5px; background: var(--c); flex: none; }
+.chip .tk { font: 800 1.1875rem/1 var(--font-glyph); letter-spacing: 0.04em; }
+.chip .dir { font: 500 1rem/1 var(--font-ui); color: var(--on-surface-var); }
+.chip .pt { margin-left: auto; font: 800 1.125rem/1 var(--font-glyph); font-variant-numeric: tabular-nums; min-width: 2.2em; text-align: right; }
+.chip .pt.p1 { color: var(--p1); }
+.chip .pt.p3 { color: var(--p3); }
+.chip .pt.p6 { color: var(--p6); font-size: 1.3125rem; }
+.chip .pt.m3 { color: var(--m3); }
+.chip[aria-pressed="true"] .pt.p1 { color: var(--p1-on); }
+.chip[aria-pressed="true"] .pt.p3 { color: var(--p3-on); }
+.chip[aria-pressed="true"] .pt.p6 { color: var(--p6-on); }
+.chip[aria-pressed="true"] .pt.m3 { color: var(--m3-on); }
+.chip[aria-pressed="true"] { background: var(--primary-container); border-color: var(--primary); color: var(--on-primary-container); }
+.chip[aria-pressed="true"] .dir { color: var(--on-primary-container); }
+.chip.off { border-style: dashed; }
+.chip.dim { background: var(--bg); }
+
+/* 操作ドック */
+.dock {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+  background: var(--surface); border: 1px solid var(--outline-var); border-radius: 32px;
+  box-shadow: var(--shadow); padding: 10px 12px 10px 14px;
+}
+.dock textarea {
+  flex: 1 1 240px; min-width: 0; min-height: 46px; max-height: 96px; resize: none; overflow-y: auto;
+  font-family: var(--font-glyph); font-size: 1.25rem; font-weight: 700;
+  letter-spacing: 0.06em; line-height: 1.5; text-transform: uppercase;
+  color: var(--on-surface); background: var(--seg-bg);
+  border: 2px solid var(--on-surface); border-radius: 23px; padding: 8px 17px;
+}
+.dock textarea:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; background: var(--surface); }
+.dock textarea::placeholder { font-weight: 500; letter-spacing: 0; color: var(--on-surface-var); }
+.grp { border: 0; margin: 0; padding: 0; min-width: 0; display: block; }
+.under .seg { min-width: 0; }
+.grp legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.cap { font-size: 1.0625rem; font-weight: 700; color: var(--on-surface-var); line-height: 1.3; white-space: nowrap; }
+.hint { flex: 1 1 100%; margin: 0 6px; font-size: 1rem; color: var(--neg); font-weight: 500; }
+.hint:empty { display: none; }
+
+/* スライドするつまみ付きのセグメント */
+.seg {
+  --n: 3; position: relative; isolation: isolate; display: flex; padding: 3px;
+  border-radius: 999px; background: var(--seg-bg); min-width: calc(var(--n) * 76px);
+}
+.seg::before {
+  content: ""; position: absolute; z-index: -1; top: 3px; bottom: 3px; left: 3px;
+  width: calc((100% - 6px) / var(--n)); border-radius: 999px; background: var(--primary);
+  transition: transform 0.28s cubic-bezier(0.3, 1.25, 0.5, 1);
+}
+.seg:has(input:nth-of-type(2):checked)::before { transform: translateX(100%); }
+.seg:has(input:nth-of-type(3):checked)::before { transform: translateX(200%); }
+.seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.seg label {
+  flex: 1 1 0; min-height: 44px; padding: 4px 8px; border-radius: 999px;
+  display: flex; align-items: center; justify-content: center; text-align: center; white-space: nowrap;
+  cursor: pointer; font-size: 1.125rem; line-height: 1.2; font-weight: 500; color: var(--on-surface);
+  transition: color 0.2s;
+}
+.seg input:checked + label { background: var(--primary); color: var(--on-primary); font-weight: 700; }
+@supports selector(:has(*)) { .seg input:checked + label { background: transparent; } }
+.seg input:focus-visible + label { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+/* 採点のしくみ（ダイアログ） */
+dialog.dlg {
+  width: min(600px, calc(100vw - 32px)); max-height: 94vh; margin: auto; padding: 0;
+  border: 0; border-radius: 28px; background: var(--surface); color: var(--on-surface);
+  box-shadow: var(--shadow); font-family: var(--font-ui);
+}
+dialog.dlg::backdrop { background: rgba(10, 24, 36, 0.5); }
+.dlg-in { padding: 18px 24px 14px; display: grid; gap: 10px; max-height: 94vh; overflow-y: auto; }
+.dlg h2 { margin: 0; font-size: 1.5rem; line-height: 1.3; font-weight: 800; }
+.dlg h3 { margin: 6px 0 0; font-size: 1.125rem; font-weight: 800; }
+.dlg p { margin: 0; font-size: 1.0625rem; line-height: 1.65; }
+.dlg table { border-collapse: collapse; width: 100%; font-size: 1.0625rem; }
+.dlg th, .dlg td { text-align: left; padding: 4px 12px 4px 0; border-bottom: 1px solid var(--outline-var); font-variant-numeric: tabular-nums; }
+.dlg th:last-child, .dlg td:last-child { text-align: right; white-space: nowrap; padding-right: 0; }
+.dlg th { font-weight: 700; color: var(--on-surface-var); font-size: 1rem; }
+.dlg .neg { color: var(--neg); font-weight: 700; }
+.dlg .privacy { background: var(--seg-bg); border-radius: 18px; padding: 12px 16px; }
+.dlg-actions { display: flex; justify-content: flex-end; }
+.iconbtn { width: 48px; min-width: 48px; height: 48px; padding: 0; border-radius: 50%; }
+.iconbtn svg { width: 26px; height: 26px; }
+#rulesBtn { background: transparent; color: var(--on-surface); }
+#rulesBtn:hover { background: var(--seg-bg); filter: none; }
+
+/* 撮影モード */
+.shootbar {
+  position: fixed; z-index: 40; left: 50%; transform: translateX(-50%);
+  bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; gap: 10px; padding: 8px 10px 8px 12px;
+  background: var(--surface); border: 1px solid var(--outline-var); border-radius: 32px; box-shadow: var(--shadow);
+}
+body.shoot header, body.shoot .dock, body.shoot .under, body.shoot .rcol { display: none; }
+body.shoot .board { grid-row: 1 / 4; max-width: none; align-items: center; justify-content: center; }
+body.shoot .lcol { width: auto; }
+.frame-logo { display: none; }
+body.shoot .frame-logo { display: block; position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); height: 52px; width: calc(52px * 3.925); pointer-events: none; }
+body.shoot .stage { inset: 16px 16px 152px; }
+body.shoot .badge { left: 50%; top: auto; bottom: 84px; transform: translateX(-50%); }
+body.shoot:not(.score-on) .badge { display: none; }
+body.shoot:not(.score-on) .stage { inset: 16px 16px 90px; }
+/* 点数のON/OFFスイッチ（M3 スイッチ） */
+.tog { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 6px; cursor: pointer; font-size: 1.0625rem; font-weight: 700; color: var(--on-surface); white-space: nowrap; }
+.tog input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.tog .track { position: relative; flex: none; width: 52px; height: 32px; border-radius: 16px; box-sizing: border-box; background: var(--seg-bg); border: 2px solid var(--outline); transition: background 0.15s, border-color 0.15s; }
+.tog .track::after { content: ''; position: absolute; top: 50%; left: 6px; width: 16px; height: 16px; margin-top: -8px; border-radius: 50%; background: var(--outline); transition: left 0.15s, width 0.15s, height 0.15s, margin-top 0.15s, background 0.15s; }
+.tog input:checked + .track { background: var(--primary); border-color: var(--primary); }
+.tog input:checked + .track::after { left: 24px; width: 24px; height: 24px; margin-top: -12px; background: var(--on-primary); }
+.tog input:focus-visible + .track { outline: 3px solid var(--primary); outline-offset: 2px; }
+.shootbar { flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 32px); }
+.shootmsg { position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%); white-space: nowrap; font-size: 1rem; font-weight: 700; background: var(--on-surface); color: var(--surface); padding: 8px 18px; border-radius: 18px; box-shadow: var(--shadow-sm); }
+.shootmsg:empty { display: none; }
+
+@media (max-width: 760px) {
+  body { padding-block: 10px; }
+  .app { gap: 10px; }
+  .board { flex-direction: column; align-items: stretch; gap: 8px; }
+  .lcol { width: 100%; gap: 10px; }
+  .frame { border-radius: 28px; }
+  .stage { inset: 58px 10px 10px; }
+  .rcol { max-width: none; min-width: 0; overflow: visible; flex: none; }
+  .legend { flex-direction: row; overflow-x: auto; overflow-y: hidden; padding-bottom: 6px; }
+  .chip { width: auto; }
+  .chip .pt { margin-left: 4px; }
+  .badge { left: 10px; top: 10px; padding: 4px 14px 4px 12px; }
+  .sc-num { font-size: 1.875rem; }
+  body.shoot .frame-logo { height: 40px; width: calc(40px * 3.925); bottom: 18px; }
+  body.shoot .badge { bottom: 64px; }
+  body.shoot .stage { inset: 12px 12px 118px; }
+  body.shoot:not(.score-on) .stage { inset: 12px 12px 70px; }
+  .shootbar .tog { flex: 1 1 100%; justify-content: center; }
+  .dock { border-radius: 28px; padding: 10px 12px; gap: 8px 10px; }
+  .dock textarea { flex: 1 1 100%; }
+  .dock .actions { flex: 1 1 100%; display: flex; gap: 8px; }
+  .dock .btn-vn { flex: 1; }
+  .shootbar { width: calc(100vw - 32px); }
+  .shootbar .cap { display: none; }
+  .shootbar .seg { flex: 1 1 100%; }
+  .shootbar .btn { flex: 1; padding: 0 12px; }
+}
+@media (min-width: 761px) { .dock .actions { display: flex; gap: 6px; } }
+@media (max-height: 540px) { html, body { height: auto; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  svg.anim .pop {
+    animation: pop 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation-delay: calc(var(--o) * 60ms);
+    transform-box: fill-box; transform-origin: center;
+  }
+  .chip:hover { transform: translateY(-1px); }
+}
+@keyframes pop { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<noscript><p style="padding:24px;font:700 18px sans-serif">このツールを使うにはJavaScriptを有効にしてください。</p></noscript>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><symbol id="cx-logo" viewBox="40 185 2092 533"><path d="M0 0 C0.5 0 0.5 0 3 0 C32.3 0.1 75.5 1.3 98.6 21.9 C104.3 28.4 105.2 32.8 105.1 41.4 C104.5 48.2 102.3 54.1 99.8 60.3 C99.4 61.2 99 62.1 98.7 63 C93.4 76.4 87.4 89.4 81.1 102.2 C80.8 102.9 80.5 103.5 80.1 104.2 C74.7 115.2 68.8 125.8 58.8 133.3 C53.3 135.1 47.6 135.4 42.2 133.3 C39.3 131.7 36.5 130 33.8 128.3 C9.4 114 -21.5 109.2 -49.2 116.3 C-55.4 118.3 -59.8 121.8 -63.2 127.3 C-66 132.8 -67.1 137.9 -67.9 143.9 C-67.9 144.4 -67.9 144.4 -68.2 146.6 C-68.6 149.2 -68.9 151.8 -69.2 154.3 C-69.4 155.4 -69.5 156.5 -69.7 157.6 C-70.5 165.1 -70.2 172.5 -69.9 179.9 C-69.9 181 -69.9 182 -69.8 183.1 C-69.3 194.8 -68.4 207 -59.8 215.8 C-50.8 221.1 -40.3 220.5 -30.2 220.5 C-28.1 220.5 -26.1 220.5 -24.1 220.5 C-3.6 220.6 12.9 215.7 30.8 206.3 C32.9 205.2 35 204.2 37 203.1 C37.7 202.8 38.3 202.5 39 202.2 C43.5 200 47.9 199.4 52.8 201 C66.3 207 71 223.1 75.9 235.9 C78.7 243.3 81.4 250.8 83.8 258.3 C85.1 255.6 85.1 253.2 85.2 250.1 C85.3 248.8 85.4 247.5 85.5 246.1 C85.6 244.7 85.7 243.2 85.8 241.8 C85.8 241.1 85.8 240.3 85.9 239.6 C86.9 222.8 87.5 206.1 87.8 189.3 C87.8 188 87.8 186.7 87.8 185.3 C88 172.6 88 159.9 87.2 147.2 C87.2 146.8 87.2 146.8 87 144.6 C86.8 140.4 86.5 136.2 86.2 132 C85.6 123.3 85.1 115.6 90.3 108.2 C105.5 95.4 132.9 85.7 152.8 87.3 C157.2 88.1 160 89.5 163.2 92.8 C166 97.4 166 102.2 166.3 107.6 C166.3 108.4 166.4 109.2 166.4 110 C166.6 112.5 166.7 115 166.8 117.6 C166.9 119.3 167 121 167.1 122.7 C167.3 126.9 167.5 131.1 167.8 135.3 C168.4 135.3 169.1 135.3 169.8 135.3 C169.9 134.9 169.9 134.9 170.6 132.7 C175.1 119.9 184.6 107.2 194.8 98.3 C195.3 97.8 195.9 97.3 196.4 96.8 C200.7 93.3 205.3 90.9 210.2 88.6 C210.9 88.3 211.5 88 212.1 87.7 C224.3 82.1 239.4 81 252.4 84.9 C262.1 88.8 270.1 94.8 274.8 104.4 C276.3 108.2 276.9 111.3 276.8 115.3 C277.6 114.8 278.4 114.2 279.3 113.6 C313.7 91.2 351.9 79.3 393.2 87.3 C417.3 92.5 442.8 104.9 456.9 126 C459 129.3 460.9 132.8 462.8 136.3 C463.3 135.3 463.8 134.2 464.3 133.1 C475.6 109.9 491 94.6 515.7 85.9 C548.9 74.8 585.1 75.1 619.1 81.6 C620.1 81.8 621.2 82 622.2 82.2 C629.4 83.7 637.9 85.5 642.5 91.6 C646.4 100.1 643.1 111 641.1 119.6 C640.8 120.8 640.5 122 640.2 123.2 C634.8 146.5 634.8 146.5 628.8 154.3 C623.9 157.3 618.7 157 613.2 155.8 C610.7 155 608.1 154.2 605.6 153.4 C597 150.6 589.3 149.1 580.2 149.1 C579.4 149 578.6 149 577.7 149 C572.6 149 569.2 149.5 564.8 152.3 C562.6 154.9 562.8 156.4 562.8 159.8 C564 164.3 565.8 166.1 569.8 168.3 C573.6 170.1 577.5 171.8 581.4 173.4 C632.8 194.5 632.8 194.5 645 222.5 C646.9 227.2 648.1 231.3 647.3 236.3 C646.9 240.1 646.8 241.9 648.8 245.3 C655.7 249.3 664 250.7 671.8 252.3 C672.5 252.5 673.3 252.6 674.1 252.8 C685.4 255 700.2 257 710.8 251.3 C713.7 248.8 713.7 247.6 714.1 243.8 C713.6 239 713.6 239 711.8 236.3 C709.3 234.8 707 233.4 704.4 232.1 C703.7 231.7 703 231.3 702.2 231 C695.3 227.5 688.2 224.5 681.1 221.5 C660.8 212.9 645.6 202 636.8 181.3 C631.4 164.1 633.4 146.6 640.8 130.3 C641.2 129.4 641.6 128.4 642 127.5 C650.9 109.6 667.8 97.1 686.2 90.4 C695.9 87.2 705.6 84.5 715.8 83.3 C716.2 83.3 716.2 83.3 718.4 83 C743.9 80.3 773.9 81.2 797.9 91.2 C808.7 95.1 820.6 92.7 831.8 91.3 C831.8 90.7 831.8 90.2 831.8 89.6 C831.9 83.6 832.1 77.6 832.3 71.7 C832.4 69.5 832.5 67.2 832.5 65 C832.6 61.8 832.7 58.6 832.8 55.4 C832.8 54.4 832.9 53.4 832.9 52.4 C833.2 44.6 835.5 39.6 840.9 34.1 C848.6 29.3 857.3 27.2 866 25.2 C867.1 25 868.2 24.7 869.4 24.5 C906.3 16.3 906.3 16.3 918.8 22.3 C921.9 24.9 923.5 26.4 924.8 30.3 C925.4 42 924.1 53.6 922.8 65.2 C922.6 67 922.4 68.8 922.2 70.5 C921.7 74.8 921.2 79 920.8 83.3 C921.5 83.2 922.2 83.2 923 83.1 C963 79.9 963 79.9 969.1 83.9 C972.5 86.8 974.3 91 975.1 95.3 C975.2 97.5 975.2 99.5 975.2 101.7 C975.2 102.5 975.2 103.3 975.1 104.1 C973.8 152.6 973.8 152.6 964 163.2 C963.4 163.7 962.9 164.1 962.2 164.6 C961.7 165.1 961.1 165.6 960.5 166.1 C956.8 168.7 953 168.6 948.6 168.8 C947.9 168.9 947.2 168.9 946.5 169 C945 169.1 943.5 169.2 942 169.2 C939.7 169.4 937.5 169.5 935.2 169.7 C927.7 170.1 920.3 170.4 912.8 170.3 C912 180.8 911.5 191.3 911.5 201.9 C911.5 204.2 911.5 206.5 911.4 208.8 C911.3 226.9 911.3 226.9 916.7 233.8 C922.2 237.8 927 238.2 933.8 237.3 C939 235.7 943.9 233.7 948.8 231.3 C953.4 229.1 957.7 228.2 962.8 229.3 C967.6 232.1 969.8 235.2 971.8 240.3 C973.3 222.7 974.6 205.2 975.8 187.6 C975.9 185.1 976.1 182.7 976.2 180.2 C976.3 179 976.4 177.8 976.5 176.6 C976.7 174.1 976.8 171.7 977 169.3 C977.4 163 977.8 156.8 978.1 150.6 C978.2 150 978.2 150 978.4 146.8 C978.5 144.4 978.6 142 978.7 139.7 C979.2 131.9 980.6 124.1 986.6 118.6 C991.5 115.2 996.8 114.1 1002.5 113.1 C1003.4 113 1004.3 112.8 1005.3 112.6 C1055.6 104.1 1055.6 104.1 1072.9 115.4 C1076.9 119.6 1078.1 124.4 1078.1 130.1 C1078.1 130.8 1078.1 131.5 1078 132.2 C1078 132.9 1078 133.7 1078 134.4 C1078 136.7 1078 139 1077.9 141.2 C1077.9 142.8 1077.9 144.4 1077.9 145.9 C1077.9 149.7 1077.8 153.5 1077.8 157.3 C1078.4 157.3 1079.1 157.3 1079.8 157.3 C1080.5 155.7 1081.1 154 1081.8 152.3 C1096 124.1 1123.3 102.9 1152.8 92.3 C1163.2 89.1 1174 86.7 1184.8 85.3 C1185.2 85.3 1185.2 85.3 1187.3 85 C1209.8 82.5 1242.6 82.9 1262.1 95.9 C1266.5 99.5 1269.2 102.7 1270.8 108.3 C1271.2 114.9 1270.5 120.9 1268.9 127.2 C1268.7 128 1268.5 128.8 1268.2 129.7 C1266.1 137.5 1263.5 145.2 1260.9 152.8 C1260.5 154 1260.1 155.1 1259.7 156.3 C1252 177.6 1252 177.6 1243.7 182.6 C1236.1 185.4 1228.8 182.6 1221.9 179.4 C1214.5 176.3 1207.8 173.9 1199.8 173.3 C1198.9 173.2 1198.1 173.2 1197.2 173.1 C1187.9 172.7 1178.7 174.6 1171.4 180.7 C1165.5 186.3 1163.2 191.5 1160.8 199.3 C1160.6 199.9 1160.4 200.6 1160.2 201.2 C1158.1 211.9 1159.7 222.8 1164.9 232.4 C1169.7 239 1178 242.2 1185.7 244 C1207.8 246.6 1228.2 237 1246.4 225.4 C1251.7 222.1 1255.3 220.8 1261.8 221.3 C1265.2 222.8 1265.2 222.8 1267.8 224.3 C1270 222.1 1269.5 217.2 1269.8 214.1 C1269.9 213.2 1270 212.2 1270.1 211.2 C1270.4 207.8 1270.7 204.5 1271 201.1 C1271.1 199.9 1271.2 198.8 1271.3 197.6 C1273.4 175.4 1275 153.2 1276.4 130.9 C1276.4 130.1 1276.5 129.3 1276.5 128.4 C1277.7 109.8 1278.8 91.1 1279.6 72.5 C1279.7 71.7 1279.7 71 1279.7 70.2 C1280 63.8 1280.3 57.4 1280.5 51 C1280.7 47.1 1280.8 43.4 1281 39.5 C1281 38.5 1281 37.4 1281.1 36.2 C1281.5 27.4 1282.5 18.4 1288.9 11.8 C1297.5 4.9 1309.3 5 1319.8 4.3 C1321.1 4.2 1322.4 4.1 1323.7 4 C1333.9 3.4 1344 3.2 1354.3 3.5 C1356.7 3.6 1359 3.6 1361.4 3.6 C1384.5 4.2 1384.5 4.2 1392.8 11.3 C1396.1 15.6 1397.1 20.1 1396.5 25.5 C1396.1 28.2 1395.5 30.8 1394.9 33.5 C1394.7 34.5 1394.5 35.6 1394.3 36.7 C1392.7 44 1391.1 51.2 1389.4 58.5 C1381.5 92.7 1373.9 127.2 1371.8 162.3 C1378.1 157.3 1382.8 151.6 1387.8 145.3 C1389.2 143.5 1390.7 141.7 1392.2 139.9 C1392.9 139 1393.7 138.1 1394.4 137.1 C1396.9 134.2 1399.3 131.2 1401.8 128.2 C1404.8 124.7 1407.7 121.1 1410.6 117.5 C1436.7 84.7 1436.7 84.7 1449.7 82.9 C1469 82 1488.3 94.6 1502.8 106.3 C1503.6 107 1504.5 107.6 1505.4 108.3 C1510.7 112.7 1515.2 118.7 1516 125.6 C1516.4 132.2 1515 136.3 1510.8 141.3 C1505.9 146.6 1499.6 150.1 1493.5 153.9 C1489.8 156.3 1486.1 158.7 1482.4 161.2 C1472.8 167.7 1463 173.9 1453.2 180.2 C1432.5 193.6 1432.5 193.6 1428.8 197.3 C1428.8 199.7 1428.8 199.7 1429.8 202.3 C1432 204.2 1432 204.2 1435 205.9 C1436.1 206.6 1437.2 207.2 1438.4 207.9 C1439.6 208.6 1440.8 209.3 1442.1 210.1 C1443.3 210.8 1444.6 211.6 1445.8 212.3 C1448.5 213.9 1451.1 215.4 1453.8 217 C1460 220.6 1466.2 224.4 1472.4 228.1 C1473 228.5 1473.5 228.8 1474.2 229.2 C1483.6 234.9 1492.8 240.8 1501.9 247.1 C1503.7 248.3 1505.5 249.4 1507.3 250.6 C1521.8 259.8 1521.8 259.8 1523.8 268.3 C1524.7 278.3 1522.3 285.1 1516 292.8 C1498.4 312.6 1470.7 336.8 1443.2 339.3 C1436.2 339.4 1430.2 337.9 1424.8 333.4 C1416.1 324.6 1409.6 313.8 1403.1 303.4 C1401.8 301.4 1400.5 299.4 1399.3 297.5 C1395.6 291.8 1392 286.1 1388.5 280.2 C1386.1 276.2 1383.6 272.1 1381.2 268.1 C1381 267.7 1381 267.7 1379.8 265.7 C1377.1 261.3 1374.4 257.1 1370.8 253.3 C1369.4 253.3 1368.1 253.3 1366.8 253.3 C1365.4 256.1 1365.6 258.2 1365.6 261.3 C1365.6 262.5 1365.6 263.8 1365.6 265.1 C1365.6 265.8 1365.6 266.4 1365.6 267.1 C1365.6 269.2 1365.6 271.4 1365.5 273.5 C1365.5 279.5 1365.4 285.5 1365.4 291.5 C1365.4 295.1 1365.4 298.8 1365.3 302.5 C1365.3 303.9 1365.3 305.3 1365.3 306.7 C1365.3 314.6 1365.2 320.6 1360.8 327.3 C1356.4 331.4 1351.8 333.3 1346 334.4 C1345.2 334.6 1344.5 334.8 1343.7 334.9 C1327 338.2 1309.7 339.7 1292.8 340.3 C1292.2 340.3 1292.2 340.3 1289.5 340.4 C1280.5 340.6 1272 340.3 1264.8 334.3 C1262 331.3 1261.3 329.1 1261.1 325.1 C1261 324.2 1260.9 323.3 1260.9 322.4 C1260.8 321.7 1260.8 321 1260.8 320.3 C1260.3 320.6 1259.8 320.9 1259.3 321.1 C1238.7 332.8 1216.3 340.3 1192.4 340.6 C1191.6 340.6 1190.8 340.6 1190 340.6 C1157.4 340.9 1157.4 340.9 1142.8 336.3 C1142 336.1 1141.2 335.8 1140.4 335.6 C1117.9 328.5 1099.8 316.5 1084.8 298.3 C1084.4 297.6 1084.1 297 1083.8 296.3 C1083.7 296.9 1083.7 297.5 1083.7 298.1 C1083.2 322.4 1083.2 322.4 1076.1 330.2 C1061 339.7 1041.7 339.8 1024.3 339.7 C1021.7 339.7 1019 339.7 1016.4 339.7 C982.6 339.8 982.6 339.8 972.8 331.3 C968.6 326.7 967.3 321.2 965.8 315.3 C964.8 315.9 963.9 316.6 963 317.2 C935.7 336.2 903.1 345.1 869.9 339.7 C858.3 337.5 846.7 332.3 838.8 323.3 C838.1 322.7 837.5 322.1 836.9 321.5 C820.9 304.9 819.4 280.1 819.6 258.3 C819.8 247.2 820.8 236.3 821.8 225.3 C821.8 224.9 821.8 224.9 822 222.7 C822.6 215.8 823.2 208.9 823.8 202 C823.9 201 824 200 824.1 199 C824.3 196.2 824.6 193.4 824.9 190.6 C824.9 189.7 825 188.9 825.1 188 C825.5 183.7 826 179.5 826.8 175.3 C826.1 175.4 825.5 175.4 824.8 175.4 C822 175.7 819.1 175.8 816.2 176 C815.2 176.1 814.2 176.2 813.2 176.2 C807.1 176.6 803.1 176.3 797.8 173.3 C794.4 170.2 794.2 166.8 793.8 162.3 C792.5 162.2 791.2 162.2 789.9 162.1 C784.6 161.6 779.6 160.3 774.5 158.9 C745.1 150.9 745.1 150.9 732.8 157.3 C731.5 160.9 731.4 163.5 731.8 167.3 C735.1 171.3 738.8 173.7 743.5 175.9 C744.2 176.3 744.9 176.6 745.5 176.9 C751 179.6 756.5 182 762.1 184.3 C772.7 188.9 782.5 193.4 791.8 200.3 C792.5 200.9 793.3 201.5 794.1 202.1 C806.7 212.3 812.6 227.7 814.8 243.3 C816.7 266.4 809.5 288.5 794.8 306.3 C776.5 327.3 749.3 338.6 721.9 341.1 C692.2 343.1 647.7 344 623.8 323.3 C621.7 320.2 619.8 317.1 619.8 313.3 C618.9 314 618 314.7 617.1 315.4 C584 341 541.4 344.9 501 340.6 C494.5 339.8 488.1 338.6 481.8 337.3 C480.9 337.1 480 336.9 479 336.8 C449 330.2 449 330.2 440.9 319.2 C438.1 314.6 437.7 311.6 437.8 306.3 C436.8 307 435.9 307.8 435 308.5 C431.3 311.5 427.5 314.4 423.8 317.3 C423 317.9 422.2 318.5 421.5 319.1 C410.3 327.1 396.1 333.1 382.8 336.3 C382.4 336.4 382.4 336.4 380.6 336.9 C368.1 340 355.8 340.7 342.9 340.8 C342.2 340.8 341.5 340.8 340.7 340.8 C310.8 340.9 281 331.9 258.8 311.3 C238.2 289.9 230.6 261.9 230.5 232.8 C230.5 232.1 230.5 231.4 230.5 230.8 C230.5 218.1 231.7 205.8 233.8 193.3 C232.9 193.1 232.1 192.8 231.3 192.6 C230.2 192.2 229.1 191.9 227.9 191.6 C227.3 191.4 227.3 191.4 224.3 190.5 C221.2 189.5 218.3 188.3 215.4 187.1 C208 184.3 198.8 183.6 191.4 186.7 C185.7 190.1 183.6 194 181.8 200.3 C181.4 203.2 181.3 205.7 181.3 208.5 C181.3 209.3 181.3 210.2 181.3 211 C181.8 230 184.6 248.9 187.1 267.7 C187.2 268.6 187.4 269.4 187.5 270.3 C188 274.4 188.6 278.4 189.2 282.5 C192.7 307.6 192.7 307.6 186.1 317.9 C180.6 323.6 173.9 326.3 166.5 328.4 C165.6 328.6 164.8 328.9 163.9 329.1 C154.6 331.8 145.2 333.7 135.8 335.3 C134.9 335.5 134 335.6 133.2 335.8 C123.4 337.4 113.8 338.6 103.9 338.8 C103.1 338.8 102.3 338.8 101.5 338.8 C94.7 338.8 89.3 336.8 84.4 332 C80.6 325.8 80.5 319.9 80.6 312.9 C80.6 312.1 80.6 311.2 80.7 310.4 C80.7 308.4 80.7 306.3 80.8 304.3 C80.2 304.8 79.7 305.3 79.1 305.9 C60.9 322.7 35.7 330.9 11.9 336.1 C11.5 336.2 11.5 336.2 9.3 336.7 C-6 339.9 -21 340.7 -36.6 340.7 C-37.6 340.7 -38.6 340.7 -39.5 340.7 C-55.1 340.6 -70 339.7 -85.2 336.3 C-86.1 336.1 -87 335.9 -87.8 335.8 C-110.1 330.9 -131.1 321.4 -148.2 306.3 C-148.7 306 -148.7 306 -150.8 304.2 C-178.1 280.6 -190 244.8 -192.9 209.8 C-195.4 173.3 -190.9 137.3 -177.2 103.3 C-177 102.6 -176.7 101.8 -176.4 101.1 C-169.2 83.3 -158 65.6 -143.8 52.7 C-141.2 50.3 -141.2 50.3 -138.8 47.3 C-134.4 42.1 -128.8 38.3 -123.2 34.3 C-122.7 33.9 -122.1 33.5 -121.5 33.1 C-86.2 7.2 -42.8 -0.2 0 0 Z M333.8 178.3 C326.3 185.3 321.2 192.9 320.5 203.2 C320.1 215.2 321.4 225 329.8 234.3 C339.4 241.5 348.8 243.4 360.8 242.3 C370.1 240.1 378 234.4 383.4 226.5 C389.6 216.3 390.4 205.6 388.1 194.1 C385.5 186 380.8 180 373.8 175.4 C361.2 169.1 345 169.8 333.8 178.3 Z M478.8 202.3 C478.2 206.7 477.6 211.1 477.1 215.5 C476.9 217 476.7 218.5 476.5 220 C475.6 227.7 474.6 235.5 473.8 243.3 C491.5 251.6 514.2 258.4 533.8 253.1 C537.4 251.7 539.2 250.2 541.8 247.3 C542.7 244.6 543.1 242.2 542.8 239.3 C538 229.9 526.6 226.8 517.3 223.1 C503.6 217.5 491.1 210.6 478.8 202.3 Z " fill="#8BCB00" transform="translate(606.25,197.6875)"/>
+<path d="M0 0 C0.5 0 0.5 0 3 0 C32.3 0.1 75.5 1.3 98.6 21.9 C104.3 28.4 105.2 32.8 105.1 41.4 C104.5 48.2 102.3 54.1 99.8 60.3 C99.4 61.2 99 62.1 98.7 63 C93.4 76.4 87.4 89.4 81.1 102.2 C80.8 102.9 80.5 103.5 80.1 104.2 C74.7 115.2 68.8 125.8 58.8 133.3 C53.3 135.1 47.6 135.4 42.2 133.3 C39.3 131.7 36.5 130 33.8 128.3 C9.4 114 -21.5 109.2 -49.2 116.3 C-55.4 118.3 -59.8 121.8 -63.2 127.3 C-66 132.8 -67.1 137.9 -67.9 143.9 C-67.9 144.4 -67.9 144.4 -68.2 146.6 C-68.6 149.2 -68.9 151.8 -69.2 154.3 C-69.4 155.4 -69.5 156.5 -69.7 157.6 C-70.5 165.1 -70.2 172.5 -69.9 179.9 C-69.9 181 -69.9 182 -69.8 183.1 C-69.3 194.8 -68.4 207 -59.8 215.8 C-50.8 221.1 -40.3 220.5 -30.2 220.5 C-28.1 220.5 -26.1 220.5 -24.1 220.5 C-3.6 220.6 12.9 215.7 30.8 206.3 C32.9 205.2 35 204.2 37 203.1 C37.7 202.8 38.3 202.5 39 202.2 C43.5 200 47.9 199.4 52.8 201 C66.3 207 71 223.1 75.9 235.9 C78.7 243.3 81.4 250.8 83.8 258.3 C85.1 255.6 85.1 253.2 85.2 250.1 C85.3 248.8 85.4 247.5 85.5 246.1 C85.6 244.7 85.7 243.2 85.8 241.8 C85.8 241.1 85.8 240.3 85.9 239.6 C86.9 222.8 87.5 206.1 87.8 189.3 C87.8 188 87.8 186.7 87.8 185.3 C88 172.6 88 159.9 87.2 147.2 C87.2 146.8 87.2 146.8 87 144.6 C86.8 140.4 86.5 136.2 86.2 132 C85.6 123.3 85.1 115.6 90.3 108.2 C105.5 95.4 132.9 85.7 152.8 87.3 C157.2 88.1 160 89.5 163.2 92.8 C166 97.4 166 102.2 166.3 107.6 C166.3 108.4 166.4 109.2 166.4 110 C166.6 112.5 166.7 115 166.8 117.6 C166.9 119.3 167 121 167.1 122.7 C167.3 126.9 167.5 131.1 167.8 135.3 C168.4 135.3 169.1 135.3 169.8 135.3 C169.9 134.9 169.9 134.9 170.6 132.7 C175.1 119.9 184.6 107.2 194.8 98.3 C195.3 97.8 195.9 97.3 196.4 96.8 C200.7 93.3 205.3 90.9 210.2 88.6 C210.9 88.3 211.5 88 212.1 87.7 C224.3 82.1 239.4 81 252.4 84.9 C261.9 88.7 270.1 94.6 274.6 104 C276.8 109.3 277.3 114.1 277.2 119.9 C277.2 120.3 277.2 120.3 277.2 122.5 C276.6 144.3 264.5 171.8 248.8 187.2 C244.3 190.9 239.7 193.3 233.8 193.3 C228.3 192.2 223.1 190.3 218 188.2 C210.3 185 203 184.3 194.8 185.3 C188.9 187.8 185.7 190.1 183.2 195.9 C181.7 200.1 181.2 204.1 181.3 208.5 C181.3 209.3 181.3 210.2 181.3 211 C181.8 230 184.6 248.9 187.1 267.7 C187.2 268.6 187.4 269.4 187.5 270.3 C188 274.4 188.6 278.4 189.2 282.5 C192.7 307.6 192.7 307.6 186.1 317.9 C180.6 323.6 173.9 326.3 166.5 328.4 C165.6 328.6 164.8 328.9 163.9 329.1 C154.6 331.8 145.2 333.7 135.8 335.3 C134.9 335.5 134 335.6 133.2 335.8 C123.4 337.4 113.8 338.6 103.9 338.8 C103.1 338.8 102.3 338.8 101.5 338.8 C94.7 338.8 89.3 336.8 84.4 332 C80.6 325.8 80.5 319.9 80.6 312.9 C80.6 312.1 80.6 311.2 80.7 310.4 C80.7 308.4 80.7 306.3 80.8 304.3 C80.2 304.8 79.7 305.3 79.1 305.9 C60.9 322.7 35.7 330.9 11.9 336.1 C11.5 336.2 11.5 336.2 9.3 336.7 C-6 339.9 -21 340.7 -36.6 340.7 C-37.6 340.7 -38.6 340.7 -39.5 340.7 C-55.1 340.6 -70 339.7 -85.2 336.3 C-86.1 336.1 -87 335.9 -87.8 335.8 C-110.1 330.9 -131.1 321.4 -148.2 306.3 C-148.7 306 -148.7 306 -150.8 304.2 C-178.1 280.6 -190 244.8 -192.9 209.8 C-195.4 173.3 -190.9 137.3 -177.2 103.3 C-177 102.6 -176.7 101.8 -176.4 101.1 C-169.2 83.3 -158 65.6 -143.8 52.7 C-141.2 50.3 -141.2 50.3 -138.8 47.3 C-134.4 42.1 -128.8 38.3 -123.2 34.3 C-122.7 33.9 -122.1 33.5 -121.5 33.1 C-86.2 7.2 -42.8 -0.2 0 0 Z " fill="#177EAD" transform="translate(606.25,197.6875)"/>
+<path d="M0 0 C0.7 0.6 1.4 1.2 2.1 1.9 C3 2.6 3.9 3.4 4.8 4.2 C18.4 16.4 26 33.4 34.2 49.4 C38 56.8 42 64.1 46.2 71.3 C46.5 71.8 46.5 71.8 47.9 74.2 C48.4 75 48.9 75.9 49.4 76.8 C49.9 77.5 50.3 78.2 50.8 79 C52.1 80.9 52.1 80.9 55.1 82.9 C60.1 76.5 65.1 70.1 69.5 63.3 C72.8 58.4 76.2 53.6 79.7 48.8 C80.7 47.5 81.6 46.2 82.5 44.9 C101.8 18 125.3 -4.2 158.6 -11.5 C177.4 -14.3 196 -11.5 211.7 -0.2 C223.1 9.3 229.8 22.4 231.3 37.1 C232.7 58.4 226.8 77.1 212.7 93.1 C210.2 95.8 207.7 98.3 205.1 100.9 C204.4 101.6 203.8 102.3 203.1 103 C192.4 113.2 178.5 120.6 165.7 127.8 C150.6 136.4 135.9 146.2 122.1 156.9 C123.7 161.2 127 163.6 130.6 166.3 C131.2 166.8 131.9 167.4 132.5 167.9 C138.5 172.6 144.8 176.8 151 181.1 C156.8 185 162.4 189 168 193.1 C171.4 195.7 174.9 198.1 178.4 200.6 C178.8 200.8 178.8 200.8 180.7 202.2 C182.4 203.4 184 204.5 185.7 205.6 C203.9 218.4 219 234.4 224.4 256.7 C227 272.2 225 287.5 215.9 300.5 C215.3 301.3 214.7 302.1 214.1 302.9 C213.7 303.5 213.2 304.2 212.7 304.9 C206.2 313.4 196.1 317.9 186.1 320.9 C185.4 321.1 184.7 321.3 184 321.6 C166.7 326.3 146.7 321.5 131.4 312.9 C113 302 96.9 287 84.1 269.9 C83.1 268.6 82.1 267.3 81.1 266 C75.3 258.4 69.6 250.8 64 243.1 C60.6 238.5 57.1 234.1 53.5 229.7 C52.1 227.9 52.1 227.9 52.1 225.9 C49 227.2 47.1 228.7 44.9 231.3 C44.3 232 43.7 232.8 43.1 233.5 C42.4 234.3 41.8 235.1 41.1 235.9 C40.4 236.7 39.8 237.5 39.1 238.3 C36.7 241.2 34.4 244 32.1 246.9 C31.9 247.2 31.9 247.2 30.7 248.6 C25.4 255.2 20.1 261.9 14.9 268.6 C10.4 274.5 5.9 280.2 1.1 285.9 C0.7 286.4 0.7 286.4 -1.3 288.8 C-17.8 307.7 -40.5 321.3 -65.8 323.1 C-83.3 323.4 -99.8 318.8 -112.9 306.9 C-125.4 293.8 -128.6 278.4 -128.2 261 C-127.2 239 -114.9 221.9 -99.4 207.5 C-87.3 197.4 -73.5 189.7 -59.9 181.8 C-52.9 177.8 -46 173.8 -39.1 169.5 C-38.5 169.1 -37.9 168.7 -37.2 168.3 C-34.1 166.3 -31.1 164.3 -28.1 162.1 C-24.9 159.9 -24.9 159.9 -22.9 159.9 C-22.9 159.2 -22.9 158.6 -22.9 157.9 C-24.5 157.2 -26.2 156.5 -27.9 155.9 C-29.3 155.1 -30.7 154.2 -32 153.3 C-40.6 148.1 -49.8 143.9 -58.9 139.4 C-118.2 110.2 -118.2 110.2 -128.3 84.3 C-129.3 81.2 -130.2 78.1 -130.9 74.9 C-131.1 74.1 -131.3 73.3 -131.5 72.5 C-133.2 61.6 -132.3 50.3 -128.9 39.9 C-128.6 39 -128.4 38 -128.1 37.1 C-122.5 19.5 -107.7 6.8 -91.9 -1.7 C-65.8 -14.7 -24.2 -19.9 0 0 Z " fill="#8BCB00" transform="translate(173.890625,214.12109375)"/>
+<path d="M0 0 C1 0.2 2 0.4 3.1 0.6 C10.3 2 18.8 3.9 23.4 10 C27.3 18.5 24 29.4 21.9 38 C21.7 39.2 21.4 40.4 21.1 41.6 C15.6 64.9 15.6 64.9 9.6 72.7 C4.7 75.7 -0.4 75.3 -5.9 74.1 C-8.5 73.4 -11 72.6 -13.6 71.8 C-22.2 69 -29.8 67.5 -38.9 67.4 C-39.7 67.4 -40.5 67.4 -41.4 67.4 C-46.5 67.3 -50 67.9 -54.4 70.7 C-56.5 73.3 -56.4 74.7 -56.4 78.1 C-55.1 82.7 -53.3 84.4 -49.4 86.7 C-45.5 88.5 -41.6 90.1 -37.7 91.7 C7.4 110.3 7.4 110.3 20.1 128.8 C20.1 129.1 20.1 129.1 20.6 130.7 C19.7 132.4 19.7 132.4 17.9 134.2 C17.3 134.9 16.6 135.6 16 136.3 C15.2 137.1 14.4 137.9 13.6 138.7 C12.7 139.6 11.8 140.5 10.9 141.5 C8.2 144.2 5.4 147 2.6 149.7 C1 151.3 -0.7 153 -2.4 154.7 C-3.5 155.8 -4.6 156.9 -5.8 158.1 C-6.3 158.7 -6.9 159.2 -7.5 159.9 C-13 165.3 -13 165.3 -14.7 167.1 C-16.2 168.5 -17.7 170 -19.2 171.5 C-21.4 173.7 -21.4 173.7 -23.8 175.5 C-26.8 178.1 -29.3 181 -31.8 184.1 C-32.3 184.6 -32.9 185.1 -33.4 185.7 C-34 185.7 -34.7 185.7 -35.4 185.7 C-36 187 -36.7 188.3 -37.4 189.7 C-38.9 191.2 -38.9 191.2 -40.7 192.6 C-47 197.9 -52.6 203.8 -58.5 209.6 C-59.7 210.9 -61 212.1 -62.2 213.4 C-64.8 216 -67.4 218.6 -70.1 221.2 C-73.4 224.6 -76.7 227.9 -80.1 231.3 C-82.7 233.8 -85.2 236.4 -87.8 239 C-89.1 240.2 -90.3 241.5 -91.5 242.7 C-93.3 244.4 -95 246.2 -96.7 247.9 C-97 248.1 -97 248.1 -98.2 249.4 C-100.7 251.8 -102.9 254.3 -105 257 C-107.4 259.7 -107.4 259.7 -111.3 260 C-112.9 259.8 -114.4 259.6 -115.9 259.3 C-116.8 259.2 -117.6 259.1 -118.5 259 C-121.1 258.6 -123.7 258.1 -126.4 257.7 C-127.2 257.5 -128.1 257.4 -129 257.2 C-168.5 250.5 -168.5 250.5 -178.3 237.3 C-181.1 233 -181.4 229.8 -181.4 224.7 C-182.3 225.4 -183.2 226.1 -184.1 226.9 C-187.8 229.8 -191.6 232.8 -195.4 235.7 C-196.1 236.3 -196.9 236.8 -197.6 237.4 C-208.9 245.5 -223 251.5 -236.4 254.7 C-237.1 254.9 -237.8 255.1 -238.5 255.2 C-251 258.3 -263.4 259.1 -276.2 259.1 C-276.9 259.1 -277.6 259.1 -278.4 259.1 C-308.3 259.3 -338.1 250.3 -360.4 229.7 C-383.9 205.2 -389.2 173.6 -388.6 140.8 C-388.4 134.1 -387.8 127.5 -386.9 120.9 C-386.8 119.9 -386.6 118.9 -386.5 117.8 C-386.1 115.2 -385.6 113.1 -384.4 110.7 C-381.8 109.3 -379.3 109 -376.4 108.7 C-361.6 102.1 -352.9 78.6 -347.6 64.6 C-346.3 61 -345.3 57.4 -344.4 53.7 C-344.3 53.3 -344.3 53.3 -343.8 51.3 C-343.4 48.7 -343.4 48.7 -343.6 45.2 C-343.7 40.9 -343.6 37.9 -342.4 33.7 C-338.8 30.1 -334.9 27.9 -330.3 25.7 C-328.4 24.7 -326.7 23.7 -324.9 22.6 C-294.8 4.2 -255.6 -1.4 -221.4 6.7 C-198.3 12.6 -174.2 25.3 -161.2 46 C-159.5 48.9 -157.9 51.8 -156.4 54.7 C-155.9 53.6 -155.4 52.6 -154.8 51.5 C-143.5 28.2 -128.1 13 -103.4 4.2 C-70.3 -6.8 -34 -6.5 0 0 Z M-285.4 96.7 C-292.8 103.6 -297.9 111.3 -298.6 121.6 C-299 133.6 -297.7 143.4 -289.4 152.7 C-279.7 159.9 -270.3 161.8 -258.4 160.7 C-249 158.4 -241.1 152.8 -235.7 144.9 C-229.5 134.7 -228.7 124 -231 112.4 C-233.6 104.4 -238.3 98.4 -245.4 93.8 C-257.9 87.5 -274.1 88.2 -285.4 96.7 Z M-140.4 120.7 C-140.9 125.1 -141.5 129.5 -142 133.9 C-142.2 135.4 -142.4 136.8 -142.6 138.3 C-143.6 146.1 -144.5 153.9 -145.4 161.7 C-127.6 170 -104.9 176.7 -85.3 171.4 C-81.7 170 -79.9 168.6 -77.4 165.7 C-76.4 163 -76 160.6 -76.4 157.7 C-81.2 148.3 -92.5 145.2 -101.8 141.5 C-115.6 135.9 -128.1 128.9 -140.4 120.7 Z " fill="#FEC300" transform="translate(1225.375,279.3125)"/>
+<path d="M0 0 C2.4 0.1 4.8 0.1 7.2 0.1 C30.3 0.7 30.3 0.7 38.5 7.8 C41.8 12.1 42.8 16.6 42.3 22 C41.8 24.7 41.2 27.3 40.7 30 C40.6 30.5 40.6 30.5 40 33.2 C38.5 40.5 36.8 47.8 35.1 55 C27.2 89.2 19.7 123.7 17.5 158.8 C23.8 153.8 28.5 148.1 33.5 141.8 C35 140 36.5 138.2 37.9 136.4 C38.7 135.5 39.4 134.6 40.2 133.6 C42.6 130.7 45.1 127.7 47.6 124.8 C50.5 121.2 53.4 117.6 56.3 114 C82.5 81.2 82.5 81.2 95.5 79.4 C114.7 78.5 134.1 91.1 148.5 102.8 C148.9 103.2 148.9 103.2 151.1 104.8 C156.4 109.2 160.9 115.2 161.8 122.1 C162.2 128.7 160.8 132.8 156.5 137.8 C151.6 143.1 145.3 146.6 139.3 150.4 C135.6 152.8 131.9 155.2 128.2 157.7 C118.5 164.2 108.8 170.4 99 176.7 C78.3 190.1 78.3 190.1 74.5 193.8 C74.5 196.2 74.5 196.2 75.5 198.8 C77.7 200.7 77.7 200.7 80.7 202.4 C81.8 203.1 83 203.8 84.1 204.4 C85.3 205.1 86.6 205.8 87.8 206.6 C89.1 207.3 90.3 208.1 91.6 208.8 C94.2 210.4 96.9 211.9 99.5 213.5 C105.8 217.1 111.9 220.9 118.1 224.6 C118.7 225 119.3 225.3 119.9 225.7 C129.3 231.4 138.5 237.3 147.6 243.6 C149.4 244.8 151.2 245.9 153 247.1 C167.5 256.3 167.5 256.3 169.5 264.8 C170.4 274.8 168.1 281.6 161.8 289.3 C144.2 309.1 116.5 333.3 88.9 335.8 C81.9 335.9 76 334.4 70.5 329.9 C61.8 321.1 55.4 310.3 48.8 299.9 C47.5 297.9 46.3 295.9 45 294 C41.3 288.3 37.7 282.6 34.2 276.7 C31.8 272.7 29.4 268.6 26.9 264.6 C26.5 263.8 26 263 25.5 262.2 C22.8 257.8 20.2 253.6 16.5 249.8 C15.2 249.8 13.8 249.8 12.5 249.8 C11.1 252.6 11.4 254.7 11.3 257.8 C11.3 259 11.3 260.3 11.3 261.6 C11.3 261.9 11.3 261.9 11.3 263.6 C11.3 265.7 11.3 267.9 11.3 270 C11.2 276 11.2 282 11.2 288 C11.2 291.6 11.1 295.3 11.1 299 C11.1 300.4 11.1 301.8 11.1 303.2 C11.1 311.1 10.9 317.1 6.5 323.8 C2.1 327.9 -2.4 329.8 -8.3 330.9 C-8.6 331 -8.6 331 -10.6 331.4 C-27.2 334.7 -44.5 336.2 -61.5 336.8 C-62 336.8 -62 336.8 -64.8 336.9 C-73.8 337.1 -82.3 336.8 -89.5 330.8 C-92.2 327.8 -92.9 325.6 -93.2 321.6 C-93.2 321.1 -93.2 321.1 -93.4 318.9 C-93.4 318.5 -93.4 318.5 -93.5 316.8 C-94 317.1 -94.5 317.4 -95 317.6 C-104 322.8 -113 327.4 -123 330.5 C-123.8 330.8 -124.6 331 -125.5 331.3 C-131.1 332.9 -131.1 332.9 -134.5 331.8 C-134.3 331.4 -134.3 331.4 -133.5 329.6 C-97.5 249.9 -97.5 249.9 -90.5 219.8 C-89.9 220 -89.2 220.2 -88.6 220.4 C-87.9 220.5 -87.2 220.7 -86.5 220.8 C-84.3 218.6 -84.8 213.7 -84.5 210.7 C-84.4 209.7 -84.3 208.7 -84.2 207.7 C-83.9 204.3 -83.6 201 -83.3 197.6 C-83.2 196.4 -83 195.3 -82.9 194.1 C-80.9 171.9 -79.3 149.7 -77.9 127.4 C-77.8 126.6 -77.8 125.8 -77.7 125 C-76.5 106.3 -75.5 87.6 -74.6 69 C-74.6 68.2 -74.6 67.5 -74.5 66.7 C-74.2 60.3 -74 53.9 -73.7 47.5 C-73.6 43.6 -73.4 39.9 -73.3 36 C-73.2 35 -73.2 33.9 -73.2 32.7 C-72.8 23.9 -71.8 14.9 -65.3 8.3 C-56.8 1.4 -45 1.5 -34.5 0.8 C-33.9 0.8 -33.9 0.8 -30.5 0.5 C-20.3 -0.1 -10.2 -0.3 0 0 Z " fill="#FF5714" transform="translate(1960.5068359375,201.18701171875)"/>
+<path d="M0 0 C0 3 0 3 -1.9 6.1 C-4.3 10.2 -5.2 14.3 -6.1 18.9 C-6.2 19.8 -6.4 20.6 -6.6 21.5 C-9.4 37.2 -11.3 53.1 -12 69 C-18.7 68.7 -24.8 67.3 -31.2 65.6 C-60.6 57.6 -60.6 57.6 -73 64 C-74.2 67.6 -74.4 70.2 -74 74 C-70.6 78 -66.9 80.4 -62.2 82.6 C-61.6 83 -60.9 83.3 -60.2 83.6 C-54.8 86.3 -49.2 88.7 -43.6 91 C-33.1 95.6 -23.2 100.1 -14 107 C-13.2 107.6 -12.4 108.2 -11.6 108.8 C0.9 118.9 6.8 134.3 9 150 C11 173.1 3.8 195.2 -11 213 C-29.3 234 -56.5 245.2 -83.9 247.8 C-113.6 249.8 -158.1 250.7 -182 230 C-184.1 226.9 -186 223.8 -186 220 C-186.9 220.7 -187.8 221.4 -188.7 222.1 C-220 246.4 -255.8 248.6 -294 248 C-288.3 239.7 -281.2 232.9 -274.1 225.8 C-272.7 224.5 -271.3 223.1 -270 221.7 C-267.1 218.9 -264.2 216 -261.4 213.2 C-257.7 209.5 -254.1 205.9 -250.4 202.2 C-247.6 199.4 -244.8 196.6 -242 193.8 C-240.6 192.4 -239.3 191.1 -237.9 189.8 C-236.1 187.9 -234.2 186 -232.3 184.1 C-231.7 183.6 -231.2 183 -230.6 182.5 C-227.2 179.1 -223.7 176 -220 173 C-218.8 171.7 -217.6 170.4 -216.5 169 C-213.6 165.6 -210.5 162.8 -207 160 C-205.3 158.3 -203.7 156.7 -202 155 C-200.9 153.9 -199.8 152.8 -198.6 151.6 C-198 151 -197.4 150.4 -196.8 149.8 C-186.6 139.6 -176.3 129.3 -166 119 C-157.2 135.3 -157.2 135.3 -158.5 143 C-158.9 146.8 -159 148.6 -157 152 C-150.1 156 -141.8 157.4 -134 159 C-133.2 159.2 -132.5 159.3 -131.7 159.5 C-120.3 161.7 -105.6 163.7 -95 158 C-92.1 155.5 -92 154.3 -91.7 150.5 C-92.1 145.7 -92.1 145.7 -94 143 C-96.4 141.4 -98.8 140.1 -101.3 138.8 C-102.1 138.4 -102.8 138 -103.6 137.6 C-110.4 134.2 -117.5 131.2 -124.6 128.2 C-145 119.6 -160.2 108.7 -169 88 C-174.4 70.8 -172.4 53.3 -165 37 C-164.8 36.5 -164.8 36.5 -163.7 34.2 C-154.9 16.3 -137.9 3.8 -119.5 -2.9 C-109.9 -6.1 -100.1 -8.9 -90 -10 C-89.1 -10.1 -88.3 -10.2 -87.4 -10.3 C-58.2 -13.4 -27.6 -10.2 0 0 Z " fill="#7736B0" transform="translate(1412,291)"/>
+<path d="M0 0 C0.7 0.6 1.4 1.2 2.1 1.9 C3 2.6 3.9 3.4 4.8 4.2 C18.4 16.4 26 33.4 34.2 49.4 C38 56.9 42 64.1 46.3 71.3 C46.9 72.2 47.4 73.2 48 74.2 C51.8 80.6 51.8 80.6 54.1 82.9 C53.5 91.9 40.5 101.9 34.5 108.4 C33.2 109.8 31.8 111.3 30.5 112.8 C23.4 120.7 15.8 128 8 135.2 C6.3 136.7 4.8 138.2 3.2 139.7 C-4 146.4 -11.8 152.2 -19.9 157.9 C-16.8 161.1 -13.9 163.8 -10.2 166.2 C-4.9 169.8 0.1 173.8 5.1 177.9 C6.1 178.7 7.1 179.5 8.1 180.3 C15.8 186.6 22.9 193.4 29.9 200.4 C30.4 200.9 30.4 200.9 32.6 203.1 C47.7 218.3 47.7 218.3 51.1 225.9 C50.4 226.6 49.8 227.2 49 227.9 C48.6 228.4 48.1 228.9 47.7 229.3 C46.6 230.4 45.5 231.4 44.5 232.4 C40.7 236.1 37.4 240 34.2 244.2 C31.6 247.5 28.9 250.8 26.3 254.1 C22.4 258.9 18.6 263.7 14.9 268.6 C10.4 274.5 5.9 280.2 1.1 285.9 C0.7 286.4 0.7 286.4 -1.3 288.8 C-17.8 307.7 -40.5 321.3 -65.8 323.1 C-83.3 323.4 -99.8 318.8 -112.9 306.9 C-125.4 293.8 -128.6 278.4 -128.2 261 C-127.2 239 -114.9 221.9 -99.4 207.5 C-87.3 197.4 -73.5 189.7 -59.9 181.8 C-52.9 177.8 -46 173.8 -39.1 169.5 C-38.5 169.1 -37.9 168.7 -37.2 168.3 C-34.1 166.3 -31.1 164.3 -28.1 162.1 C-24.9 159.9 -24.9 159.9 -22.9 159.9 C-22.9 159.2 -22.9 158.6 -22.9 157.9 C-24.5 157.2 -26.2 156.5 -27.9 155.9 C-29.3 155.1 -30.7 154.2 -32 153.3 C-40.6 148.1 -49.8 143.9 -58.9 139.4 C-118.2 110.2 -118.2 110.2 -128.3 84.3 C-129.3 81.2 -130.2 78.1 -130.9 74.9 C-131.1 74.1 -131.3 73.3 -131.5 72.5 C-133.2 61.6 -132.3 50.3 -128.9 39.9 C-128.6 39 -128.4 38 -128.1 37.1 C-122.5 19.5 -107.7 6.8 -91.9 -1.7 C-65.8 -14.7 -24.2 -19.9 0 0 Z " fill="#00A7D1" transform="translate(173.890625,214.12109375)"/>
+<path d="M0 0 C3.9 3.8 6.3 7.4 6.7 12.9 C6.7 18.7 6.1 23.9 4.6 29.6 C4.4 30.4 4.2 31.2 4 32.1 C1.9 39.9 -0.7 47.5 -3.4 55.2 C-3.8 56.3 -4.2 57.5 -4.6 58.7 C-12.2 80 -12.2 80 -20.6 85 C-28.2 87.7 -35.4 85 -42.4 81.8 C-49.7 78.7 -56.5 76.2 -64.5 75.7 C-65.3 75.6 -66.2 75.5 -67 75.5 C-76.4 75.1 -85.6 77 -92.8 83.1 C-98.8 88.7 -101.1 93.9 -103.5 101.7 C-103.7 102.3 -103.9 102.9 -104.1 103.6 C-106.2 114.3 -104.6 125.2 -99.4 134.8 C-94.6 141.4 -86.2 144.6 -78.5 146.3 C-56.4 148.9 -36.1 139.4 -17.9 127.8 C-12.5 124.4 -8.9 123.2 -2.5 123.7 C-1.5 124.3 -0.5 125 0.5 125.7 C-8.6 157.8 -21.2 188.4 -35.1 218.7 C-35.4 219.4 -35.8 220.2 -36.1 221 C-37.1 223.2 -38.1 225.4 -39.1 227.6 C-39.4 228.2 -39.7 228.9 -40 229.5 C-40.8 231.3 -41.7 233 -42.5 234.7 C-42.9 235.6 -43.3 236.6 -43.7 237.5 C-46.4 240.8 -49.5 241 -53.5 241.5 C-54.3 241.6 -55.1 241.7 -55.9 241.8 C-64.7 243 -73.5 243.2 -82.4 243.1 C-83.2 243.1 -84 243.1 -84.9 243.1 C-97.4 243 -109.4 242.5 -121.5 238.7 C-122.3 238.4 -123.1 238.2 -123.9 238 C-150.6 229.5 -174.3 213.2 -187.5 187.9 C-204.5 152.1 -203.2 109.5 -190.5 72.7 C-190.4 72.3 -190.4 72.3 -189.8 70.6 C-178.9 39.4 -154.5 15.1 -125.2 0.5 C-110.8 -6.4 -95.3 -10.3 -79.5 -12.3 C-79.1 -12.4 -79.1 -12.4 -76.9 -12.7 C-54.2 -15.2 -18.6 -15.1 0 0 Z " fill="#00A6D1" transform="translate(1870.5,295.3125)"/>
+<path d="M0 0 C1 0.2 2 0.4 3.1 0.6 C10.3 2 18.8 3.9 23.4 10 C27.3 18.5 24 29.4 21.9 38 C21.7 39.2 21.4 40.4 21.1 41.6 C15.6 64.9 15.6 64.9 9.6 72.7 C4.7 75.7 -0.4 75.3 -5.9 74.1 C-8.5 73.4 -11 72.6 -13.6 71.8 C-22.2 69 -29.8 67.5 -38.9 67.4 C-39.7 67.4 -40.5 67.4 -41.4 67.4 C-46.5 67.3 -50 67.9 -54.4 70.7 C-56.5 73.3 -56.4 74.7 -56.4 78.1 C-55.1 82.7 -53.3 84.4 -49.4 86.7 C-45.5 88.5 -41.6 90.1 -37.7 91.7 C7.4 110.3 7.4 110.3 20.1 128.8 C20.2 129.4 20.4 130 20.6 130.7 C19.7 132.4 19.7 132.4 17.9 134.2 C17.6 134.6 17.6 134.6 16 136.3 C15.2 137.1 14.4 137.9 13.6 138.7 C12.7 139.6 11.8 140.5 10.9 141.5 C8.2 144.2 5.4 147 2.6 149.7 C1 151.3 -0.7 153 -2.4 154.7 C-3.5 155.8 -4.6 156.9 -5.8 158.1 C-6.3 158.7 -6.9 159.2 -7.5 159.9 C-13 165.3 -13 165.3 -14.7 167.1 C-16.2 168.5 -17.7 170 -19.2 171.5 C-21.4 173.7 -21.4 173.7 -23.8 175.5 C-26.8 178.1 -29.3 181 -31.8 184.1 C-32.3 184.6 -32.9 185.1 -33.4 185.7 C-34 185.7 -34.7 185.7 -35.4 185.7 C-36 187 -36.7 188.3 -37.4 189.7 C-38.9 191.2 -38.9 191.2 -40.7 192.6 C-47 197.9 -52.6 203.8 -58.5 209.6 C-59.7 210.9 -61 212.1 -62.2 213.4 C-64.8 216 -67.4 218.6 -70.1 221.2 C-73.4 224.6 -76.7 227.9 -80.1 231.3 C-82.7 233.8 -85.2 236.4 -87.8 239 C-89.1 240.2 -90.3 241.5 -91.5 242.7 C-93.3 244.4 -95 246.2 -96.7 247.9 C-97.2 248.4 -97.7 248.9 -98.2 249.4 C-100.7 251.8 -102.9 254.3 -105 257 C-107.4 259.7 -107.4 259.7 -111.3 260 C-112.9 259.8 -114.4 259.6 -115.9 259.3 C-116.8 259.2 -117.6 259.1 -118.5 259 C-121.1 258.6 -123.7 258.1 -126.4 257.7 C-127.2 257.5 -128.1 257.4 -129 257.2 C-168.6 250.5 -168.6 250.5 -178.3 237.3 C-182.9 230.2 -182 222.9 -180.3 214.9 C-170.4 171.4 -170.4 171.4 -156.6 161.8 C-149.2 159.3 -141.9 162.3 -134.9 165.1 C-119.4 170.8 -99.5 175.6 -83.4 169.7 C-80.4 168.1 -78.8 167.1 -77.8 163.8 C-77.1 159.7 -77.2 157.3 -79.4 153.7 C-86 148.5 -94.1 145.6 -101.8 142.5 C-124.3 133.2 -145.4 122.7 -155.4 99.3 C-162.2 81.5 -159.6 62.5 -152.2 45.5 C-143.4 26.1 -126.5 13.4 -107.1 5.8 C-73.1 -6.9 -35.4 -6.8 0 0 Z " fill="#FF5714" transform="translate(1225.375,279.3125)"/>
+<path d="M0 0 C6.9 5.2 11.3 11.4 13.6 19.8 C14.1 22.9 14.1 26.1 14.1 29.3 C14.1 30.2 14.1 31.1 14 32 C13.5 53.8 1.3 81.3 -14.3 96.7 C-18.8 100.4 -23.5 102.8 -29.4 102.8 C-34.8 101.6 -40 99.8 -45.1 97.6 C-52.8 94.4 -60.2 93.7 -68.4 94.8 C-74.2 97.2 -77.4 99.5 -80 105.4 C-81.5 109.6 -81.9 113.5 -81.8 117.9 C-81.8 118.4 -81.8 118.4 -81.8 120.5 C-81.3 139.4 -78.5 158.4 -76 177.1 C-75.9 178 -75.8 178.8 -75.7 179.7 C-75.1 183.8 -74.5 187.9 -74 192 C-70.4 217.1 -70.4 217.1 -77.1 227.4 C-82.5 233 -89.2 235.7 -96.6 237.8 C-97.1 237.9 -97.1 237.9 -99.2 238.6 C-108.5 241.2 -117.9 243.1 -127.4 244.8 C-128.2 244.9 -129.1 245.1 -130 245.2 C-139.7 246.9 -149.3 248 -159.2 248.2 C-160 248.2 -160.8 248.2 -161.6 248.2 C-168.5 248.2 -173.8 246.2 -178.8 241.4 C-186.3 228.9 -181.9 210.2 -180.8 196.4 C-180.3 190.5 -179.8 184.7 -179.4 178.9 C-179.3 177.8 -179.2 176.6 -179.1 175.4 C-177.1 149.9 -175.8 124.4 -175.4 98.8 C-175.3 97.4 -175.3 96.1 -175.3 94.8 C-175.1 82 -175.2 69.3 -175.9 56.6 C-176 56.2 -176 56.2 -176.1 54 C-176.3 49.8 -176.6 45.6 -176.9 41.4 C-177.5 32.7 -178.1 25 -172.9 17.6 C-157.7 4.8 -130.2 -4.8 -110.4 -3.2 C-106 -2.5 -103.2 -1 -99.9 2.2 C-97.1 6.9 -97.1 11.7 -96.8 17 C-96.8 17.4 -96.8 17.4 -96.7 19.4 C-96.6 21.9 -96.4 24.5 -96.3 27 C-96.2 28.7 -96.1 30.4 -96 32.1 C-95.8 36.4 -95.6 40.5 -95.4 44.8 C-94.7 44.8 -94.1 44.8 -93.4 44.8 C-93.1 43.9 -92.8 43 -92.6 42.1 C-88 29.3 -78.5 16.7 -68.4 7.8 C-67.8 7.2 -67.3 6.8 -66.7 6.2 C-62.4 2.8 -57.8 0.3 -52.9 -2 C-52.3 -2.3 -51.6 -2.6 -51 -2.9 C-34.8 -10.3 -15.1 -9.7 0 0 Z " fill="#27B1A4" transform="translate(869.375,288.25)"/>
+<path d="M0 0 C4.6 4.7 5.4 10.6 5.6 16.9 C5.6 17.7 5.7 18.4 5.7 19.2 C5.8 20.8 5.8 22.4 5.9 24 C5.9 26.3 6.1 28.7 6.2 31.1 C6.6 40.8 5.3 48.5 1.4 57.4 C-12.2 88.8 -10.4 128.2 0.9 159.9 C1.2 160.9 1.6 161.9 1.9 162.9 C4.2 169.1 4.2 169.1 6.1 171.6 C10.4 177.5 10.6 182.6 10.4 189.8 C10.4 190.8 10.5 191.8 10.5 192.9 C10.4 201.2 8.9 208.6 3.2 214.8 C-11.9 224.3 -31.1 224.4 -48.5 224.3 C-51.2 224.3 -53.9 224.3 -56.5 224.3 C-90.3 224.4 -90.3 224.4 -100.1 215.9 C-104.5 210.9 -106.2 205.4 -106.1 198.8 C-105 195.7 -103.5 194 -101.4 191.6 C-96.2 184.7 -96.7 175.7 -96.8 167.5 C-96.8 166.2 -96.8 165 -96.8 163.8 C-96.9 155.2 -97.7 147 -99.4 138.7 C-100.9 130.9 -101.1 124.2 -100.5 116.3 C-100.4 115.3 -100.3 114.2 -100.2 113.2 C-100 111 -99.8 108.7 -99.7 106.5 C-99.2 100.6 -98.7 94.7 -98.2 88.7 C-98.2 87.5 -98 86.3 -98 85 C-96.8 70 -96 55.1 -95.2 40.1 C-93.5 10.4 -93.5 10.4 -87.1 3.9 C-81.7 0.3 -76.8 -1.1 -70.4 -2.2 C-70 -2.3 -70 -2.3 -67.7 -2.7 C-17.4 -11.4 -17.4 -11.4 0 0 Z " fill="#BF2F91" transform="translate(1679.125,313.07421875)"/>
+<path d="M0 0 C11.1 10.7 17.1 24.4 17.5 39.8 C17.6 62.5 9.8 80.2 -6.1 96.3 C-7 97.3 -8 98.2 -8.9 99.2 C-9.6 99.9 -10.3 100.6 -11 101.3 C-21.6 111.5 -35.5 119 -48.3 126.1 C-63.1 134.5 -78.2 143.9 -91 155.2 C-92.9 156.2 -92.9 156.2 -95 155.6 C-97.1 154.1 -98.9 152.4 -100.7 150.5 C-103.3 147.8 -106 145.2 -108.8 142.8 C-115.8 136.8 -122.2 130.2 -128.2 123.2 C-130.2 120.9 -132.2 118.7 -134.3 116.4 C-138.6 111.7 -142.7 106.8 -146.6 101.8 C-147.6 100.6 -148.6 99.4 -149.5 98.2 C-151.2 96.1 -152.9 93.9 -154.6 91.8 C-154.9 91.4 -154.9 91.4 -156.3 89.7 C-156.8 89 -157.3 88.4 -157.8 87.7 C-158.3 87.1 -158.7 86.5 -159.2 85.9 C-159.9 84.2 -159.9 84.2 -159.2 82.2 C-158 80.3 -156.8 78.5 -155.5 76.7 C-155 76.1 -154.5 75.5 -154.1 74.8 C-153.6 74.1 -153.1 73.5 -152.6 72.8 C-149.2 68.3 -146 63.8 -142.9 59.2 C-140.1 55.1 -137.2 51.1 -134.4 47.1 C-133.4 45.9 -132.5 44.5 -131.6 43.2 C-112.2 16.3 -88.7 -5.9 -55.4 -13.2 C-35.8 -16.1 -15.6 -13 0 0 Z " fill="#FF5714" transform="translate(387.9375,215.8125)"/>
+<path d="M0 0 C3.2 1.4 6 3.4 8.8 5.5 C9.4 6 10.1 6.4 10.7 6.9 C16 10.7 21.1 14.7 26.2 18.9 C27.2 19.7 28.1 20.5 29.2 21.4 C36.8 27.7 44 34.5 51 41.5 C51.9 42.4 52.7 43.2 53.6 44.1 C68.8 59.3 68.8 59.3 72.2 66.9 C71.5 67.6 70.8 68.3 70.1 69 C69.9 69.2 69.9 69.2 68.7 70.4 C67.7 71.4 66.6 72.5 65.5 73.5 C61.7 77.2 58.4 81 55.2 85.2 C52.7 88.6 50 91.9 47.4 95.2 C43.5 100 39.7 104.8 36 109.7 C31.5 115.5 26.9 121.3 22.2 126.9 C21.4 127.9 20.6 128.9 19.7 129.9 C3.3 148.7 -19.4 162.4 -44.7 164.1 C-62.2 164.4 -78.7 159.8 -91.8 147.9 C-104.3 134.9 -107.5 119.5 -107.1 102 C-106.1 80.1 -93.8 63 -78.3 48.5 C-66.3 38.4 -52.4 30.7 -38.8 22.9 C-31.9 18.9 -25 14.9 -18.2 10.6 C-17.5 10.2 -16.9 9.8 -16.2 9.4 C-11.9 6.7 -7.7 3.8 -3.6 0.8 C-1.8 -0.1 -1.8 -0.1 0 0 Z " fill="#7736B0" transform="translate(152.8203125,373.0703125)"/>
+<path d="M0 0 C4.3 1.4 5.9 4.7 8.4 8.2 C13.9 15.6 19.7 22.6 25.8 29.6 C26.8 30.8 27.8 31.9 28.8 33.1 C38.4 44.3 48.6 54.8 59.5 64.8 C60.2 65.4 60.9 66.1 61.6 66.7 C62.2 67.3 62.8 67.8 63.4 68.4 C65 70 65 70 67 73 C66.4 73.5 65.7 74 65 74.5 C58 80.2 51.4 86.1 44.8 92.3 C43 94 41.1 95.8 39.2 97.5 C27.4 108.5 15.9 120 4.5 131.5 C2 134 -0.5 136.5 -3 139 C-3.5 138.4 -3.9 137.8 -4.4 137.2 C-16.3 122 -30.1 107.1 -45.3 95.1 C-48.2 92.8 -51 90.4 -53.9 88 C-59.2 83.5 -64.8 79.7 -70.6 75.9 C-71.4 75.3 -72.2 74.7 -73 74 C-73 73 -73 72 -73 71 C-70.8 69.1 -70.8 69.1 -67.8 67 C-58 59.9 -48.9 52.2 -40.5 43.5 C-38.5 41.5 -36.4 39.6 -34.2 37.7 C-29.9 34 -26.1 30.1 -22.2 25.9 C-21.6 25.2 -20.9 24.5 -20.2 23.7 C-4.8 7.2 -4.8 7.2 0 0 Z " fill="#FEC200" transform="translate(227,300)"/>
+<path d="M0 0 C3 1.9 5.3 4.3 7.8 6.8 C8.2 7.2 8.2 7.2 9.9 8.8 C11.9 10.9 14 12.9 16 15 C17.2 16.2 18.4 17.3 19.5 18.5 C23.2 22.1 26.8 25.8 30.4 29.5 C34 33 37.7 36.3 41.4 39.6 C48.6 46.2 48.6 46.2 49.5 50.3 C49.7 53.9 49.7 56.9 47.7 59.9 C47.2 60.5 46.6 61.1 46 61.7 C45.4 62.4 44.8 63.1 44.1 63.8 C43.8 64.2 43.8 64.2 42 66 C41.3 66.8 40.5 67.5 39.8 68.3 C37.4 70.8 35 73.2 32.6 75.6 C31.8 76.4 30.9 77.2 30.1 78 C25.8 82.3 21.5 86.4 16.9 90.3 C13.2 93.5 9.9 97.1 6.6 100.5 C2.7 104.5 -0.4 107.2 -6.1 107.7 C-12.8 107.5 -16.6 102.6 -21 98 C-22.5 96.5 -24.1 94.9 -25.6 93.4 C-26.3 92.7 -26.9 92 -27.6 91.3 C-29.5 89.5 -31.5 87.7 -33.6 85.9 C-38.6 81.6 -43.3 76.9 -48 72.2 C-49.5 70.7 -51 69.2 -52.5 67.7 C-53.5 66.7 -54.4 65.7 -55.4 64.8 C-56.2 63.9 -57.1 63 -58 62.1 C-61.4 58.5 -61.5 55.5 -61.4 50.6 C-60.5 44.7 -55.5 41.4 -51.2 37.8 C-47.2 34.2 -43.4 30.5 -39.7 26.7 C-38.3 25.3 -37 23.9 -35.6 22.6 C-33.5 20.4 -31.4 18.3 -29.3 16.2 C-27.3 14.1 -25.2 12 -23.2 9.9 C-22.6 9.3 -21.9 8.7 -21.3 8 C-15.1 1.8 -9.1 -3.2 0 0 Z " fill="#C02F91" transform="translate(1643,187)"/>
+<path d="M0 0 C5.1 1.5 8.2 4.7 11.9 8.2 C12.6 8.9 13.2 9.5 13.9 10.1 C19.1 15.1 24.2 20.1 29.2 25.2 C32.2 28.2 35.2 31.1 38.4 33.9 C41.1 36.2 43.6 38.5 46.1 41 C46.6 41.6 47.2 42.2 47.9 42.8 C49.2 45.3 49.5 47.1 48.9 50 C46.7 54.8 42.3 58.4 38.4 62 C37.6 62.9 36.7 63.7 35.8 64.6 C31.2 69.1 26.5 73.4 21.7 77.5 C19.6 79.3 17.6 81.3 15.6 83.2 C1.4 96 -15.7 105.2 -33.9 111.1 C-34.5 111.3 -35.2 111.5 -35.9 111.7 C-39.2 112.7 -40.7 113.1 -44 112 C-43.7 111.3 -43.3 110.5 -43 109.8 C-7 30.1 -7 30.1 0 0 Z " fill="#FDC300" transform="translate(1870,421)"/>
+<path d="M0 0 C1.6 0 3.2 0 4.8 0 C8.2 0 11.6 0 14.9 0 C18.3 0 21.7 0 25.1 0 C112 -0.4 112 -0.4 140.8 19.2 C141.6 19.7 142.4 20.2 143.2 20.8 C154.1 28.6 160.5 39.1 165.8 51.2 C166.1 51.9 166.4 52.7 166.8 53.4 C173.5 71 173 91.6 173.1 110.2 C173.1 111.1 173.1 112.1 173.1 113 C172.9 253.7 172.9 253.7 140.8 297.2 C140.2 298.1 139.5 299 138.8 299.9 C123 321 97.3 328.2 72.3 331.7 C13.4 339.2 -83.6 351.1 -135.2 316.1 C-137.7 314.2 -139.9 312.3 -142.2 310.2 C-142.8 309.6 -143.5 309.1 -144.1 308.5 C-162.7 291.4 -166.2 264 -168.2 240.2 C-168.3 238.9 -168.4 237.7 -168.5 236.4 C-173 177.8 -173 78.7 -133.4 31.4 C-108.1 4.5 -67.5 3.5 -33.2 1.2 C-32.1 1.1 -30.9 1 -29.7 0.9 C-19.8 0.2 -9.9 0 0 0 Z M-45.9 116.6 C-58.4 133 -55.4 168.8 -55.3 188.4 C-55.3 190.7 -55.3 192.9 -55.3 195.2 C-55.3 196.7 -55.3 198.1 -55.3 199.6 C-55.3 200.9 -55.3 202.2 -55.3 203.5 C-55.1 210.7 -54.6 215 -49.2 220.2 C-44 222.8 -39.4 223.8 -33.7 224.4 C-32.9 224.4 -32 224.5 -31.1 224.6 C-13.3 226.1 4.8 225.7 22.6 224.4 C23.6 224.3 24.6 224.2 25.6 224.1 C34.6 223.4 43.4 222 49.8 215.2 C53.1 208.9 53.9 202.4 54.9 195.4 C55 194.2 55.2 193 55.4 191.8 C58 173 59.8 154.3 60 135.3 C60.1 134.4 60.1 133.6 60.1 132.7 C60.1 125.7 59.2 118.5 55 112.7 C48.8 108.4 41.5 108.5 34.2 108 C33.1 108 32 107.9 30.9 107.8 C-31.1 103.2 -31.1 103.2 -45.9 116.6 Z " fill="#27B1A4" transform="translate(944.343,617.360) scale(0.27624)"/>
+<path d="M0 0 C8.3 7 14.1 15.6 17.3 26 C17.3 27 17.3 28 17.3 29 C31.9 28.6 46.5 28 61.2 26.9 C71 26.2 80.8 25.8 90.7 25.7 C92.6 25.7 94.6 25.7 96.5 25.6 C115.3 25.6 132 30.4 146.3 43 C160 57.2 162.8 76.7 162.5 95.5 C160.1 177.3 121.1 261 62.3 317 C58.7 320.2 55.1 323.1 51.3 326 C50 327 48.8 328 47.6 329 C36.7 337.6 25.2 345 13.3 352 C12.6 352.4 11.9 352.8 11.3 353.2 C-22.6 372.7 -73.5 395 -113.1 385.4 C-129.6 380.9 -143.1 372 -151.7 357 C-153.3 353.7 -154.6 350.4 -155.7 347 C-155.9 346.4 -156.2 345.7 -156.4 345.1 C-160.1 332.8 -157.7 319.4 -152 308.2 C-140.1 288 -119.4 280.9 -98.5 273.1 C-88.7 269.4 -79.2 265.5 -69.7 261 C-69 260.7 -68.4 260.4 -67.7 260 C-53 253.1 -39.5 245.1 -26.7 235 C-26.3 234.7 -26.3 234.7 -24.1 233 C-0.5 214.4 24.4 185.5 30.1 155.1 C30.5 151.3 30.3 148.7 29.3 145 C19.2 136.5 2.2 138.9 -10.2 138.8 C-11.3 138.8 -12.5 138.8 -13.8 138.8 C-22.8 138.8 -32.4 138.9 -39.7 145 C-42.4 148 -44.9 151.1 -47.4 154.3 C-49.9 157.5 -52.5 160.7 -55 163.9 C-55.6 164.6 -56.1 165.2 -56.7 165.9 C-61.2 171.5 -66 176.8 -71 182.1 C-73.4 184.6 -75.7 187.2 -78 189.9 C-81.6 194 -85.5 197.5 -89.7 201 C-90.4 201.6 -91.1 202.2 -91.8 202.7 C-107.2 215.4 -123.1 219.7 -142.7 218 C-157.4 215.4 -171.3 206.7 -180.2 194.8 C-185.4 187.3 -188.7 179.9 -190.7 171 C-190.9 170.2 -191.1 169.4 -191.3 168.6 C-193.7 153.9 -190.6 139.6 -182.7 127 C-179.9 123.4 -176.9 120.2 -173.7 117 C-173.4 116.7 -173.4 116.7 -171.8 114.9 C-168.2 111.2 -164.4 107.9 -160.3 104.6 C-152 97.9 -144.7 90.2 -137.7 82 C-136.9 81 -136.1 80.1 -135.2 79.1 C-129 72 -123.3 64.5 -117.9 56.8 C-116.8 55.1 -115.6 53.5 -114.5 51.8 C-110.2 45.7 -106.3 39.4 -102.6 33 C-102.3 32.3 -101.9 31.7 -101.5 31 C-99.7 27.8 -97.8 24.6 -96 21.4 C-86.5 4.7 -75.4 -5.5 -56.7 -11 C-38.2 -15.9 -15.3 -11.2 0 0 Z " fill="#177EAD" transform="translate(854.982,608.290) scale(0.27624)"/>
+<path d="M0 0 C8.9 7.3 14.3 16.4 16 27.8 C16.3 27.8 16.3 27.8 17.8 27.7 C116.5 21.5 116.5 21.5 137.9 39.7 C151.7 52.2 157.8 67.4 159.2 85.7 C161.9 153.6 135.2 224.9 95 278.8 C94.6 279.4 94.1 280 93.7 280.6 C83.3 294.5 71.4 307.8 58 318.8 C57.4 319.3 56.8 319.8 56.2 320.3 C40.1 333.5 22.7 345.2 3.8 354 C2.1 354.8 0.3 355.6 -1.4 356.5 C-35.2 373 -85.9 394.5 -124 381.8 C-132.9 378.2 -141.3 373.9 -148 366.8 C-148.5 366.3 -149.1 365.8 -149.6 365.2 C-158.8 355.5 -162.4 343.1 -162.4 330 C-162 316.7 -156.6 304.8 -146.9 295.6 C-134.7 285.6 -121.3 281.3 -106.4 277.1 C-59.9 263.9 -11.1 241.1 13.6 197.3 C22 181.8 31.1 164 29 145.8 C27.2 142.4 25.8 141.2 22.4 139.6 C13.1 137.5 3.7 137.6 -5.7 137.6 C-8 137.6 -10.3 137.6 -12.5 137.6 C-33.7 137.5 -33.7 137.5 -40.9 144.4 C-44.5 148.5 -47.8 152.8 -51.1 157.1 C-55.8 163.2 -60.9 169 -66 174.8 C-66.7 175.6 -67.3 176.3 -68 177.1 C-69.7 179 -71.3 180.9 -73 182.8 C-73.7 183.6 -74.3 184.4 -75 185.2 C-87.6 199.4 -103.5 214.3 -123.4 216 C-134.4 216.7 -144.7 216.3 -155 211.8 C-155.8 211.5 -156.6 211.1 -157.4 210.8 C-163.8 207.6 -168.9 202.8 -174 197.8 C-174.6 197.3 -175.1 196.7 -175.7 196.2 C-186.4 184.9 -190.5 168.8 -190.4 153.7 C-189.7 133.4 -179.1 120.3 -164.9 107.1 C-161.4 103.9 -157.9 100.7 -154.3 97.7 C-151.8 95.6 -149.6 93.4 -147.6 90.9 C-145.2 88.1 -142.7 85.5 -140.1 82.9 C-135.6 78.5 -131.8 73.8 -128 68.8 C-127.6 68.3 -127.2 67.8 -126.8 67.3 C-115.4 52.4 -105.3 36.7 -96.7 20.1 C-88.5 4.5 -78.5 -5.6 -61.6 -11.5 C-40.5 -17.3 -17.5 -12.7 0 0 Z " fill="#00A7D1" transform="translate(1329.924,608.893) scale(0.27624)"/>
+<path d="M0 0 C3.6 0 7.3 0 10.9 0 C78.1 -0.2 78.1 -0.2 100.7 21 C111.4 32.5 115.8 47.7 115.6 63.2 C112.8 102.2 90.4 140.1 68.2 171.2 C67.6 172.1 66.9 172.9 66.3 173.9 C66 174.2 66 174.2 64.6 176.1 C62.3 179.8 62.3 179.8 62.3 182.2 C64.5 184.3 64.5 184.3 67.7 186.6 C68.9 187.4 70.1 188.3 71.3 189.2 C72 189.7 72.6 190.2 73.3 190.6 C77 193.4 80.5 196.3 84 199.2 C85.4 200.4 86.9 201.7 88.3 202.9 C88.7 203.2 88.7 203.2 90.4 204.6 C93 206.7 95.5 208.8 98.1 210.9 C106.4 217.7 114.6 224.6 122.6 231.7 C123.7 232.7 124.9 233.6 126.1 234.5 C136.7 242.9 143.8 254.9 146.3 268.2 C148.2 286.9 143.7 303 132 317.9 C120.4 331.5 107.1 339.5 89.5 342.9 C69.8 344.5 54.8 337 40 324.6 C36.5 321.6 33.1 318.6 29.8 315.4 C27.7 313.5 25.5 311.6 23.3 309.7 C19.2 306.1 15.1 302.3 11 298.6 C8.8 296.6 6.7 294.7 4.5 292.8 C0.8 289.7 -2.6 286.4 -6.2 283.2 C-7.3 282.1 -8.4 281.1 -9.5 280.1 C-11.4 278.4 -13.3 276.6 -15.1 274.8 C-15.8 274.2 -16.5 273.5 -17.2 272.9 C-17.7 272.3 -18.3 271.8 -18.9 271.2 C-20.7 270.2 -20.7 270.2 -23 270.2 C-26.7 271.6 -29.1 274 -31.9 276.8 C-33 277.9 -34.2 279 -35.3 280.1 C-35.9 280.6 -36.5 281.1 -37 281.7 C-40.7 285.1 -44.7 288.1 -48.7 291.2 C-49.2 291.6 -49.2 291.6 -51.7 293.6 C-118.1 346.5 -118.1 346.5 -149.7 343.2 C-161.1 341.1 -171.8 335.6 -179.1 326.5 C-189.3 311.5 -191.3 295.4 -188.3 277.9 C-186 266.5 -180.1 255.9 -172.7 247.2 C-172.5 246.9 -172.5 246.9 -171.4 245.5 C-162.6 234 -148.3 226.1 -136.3 218.2 C-133.5 216.3 -130.7 214.5 -128 212.7 C-127.3 212.2 -126.6 211.8 -125.9 211.3 C-114.6 203.9 -103.5 196.2 -92.7 188.2 C-91.7 187.5 -90.8 186.8 -89.9 186.2 C-77 176.6 -64.7 166.8 -53.7 155.2 C-52 153.5 -50.3 151.8 -48.7 150.2 C-41.5 142.8 -36 134.9 -30.7 126.2 C-30.1 125.3 -29.5 124.4 -28.9 123.4 C-26.9 119.9 -26.4 117.5 -27.2 113.5 C-29 110.7 -30.4 110.4 -33.6 109.6 C-37.5 108.8 -41.4 108.9 -45.4 108.9 C-46.3 108.9 -47.2 109 -48.2 109 C-63.9 109.2 -79.6 110.4 -95.1 112.3 C-113 114.5 -131.6 115.4 -146.7 104.2 C-157 95.8 -161.4 84.6 -163 71.5 C-163.7 56 -156.8 41.4 -147.1 29.7 C-121.9 3.6 -83.8 3 -49.9 1.3 C-48.3 1.2 -46.8 1.1 -45.2 1.1 C-30.1 0.3 -15.1 0 0 0 Z " fill="#FF5714" transform="translate(1039.773,615.974) scale(0.27624)"/>
+<path d="M0 0 C8.2 6.4 13.9 15.8 17 25.7 C17.1 26 17.1 26 17.7 27.8 C21.4 41.5 19.2 56.9 12.8 69.5 C4.5 82.9 -8.2 93.2 -23.6 96.9 C-33.7 98.7 -43.8 98.8 -54.1 98.8 C-55.6 98.8 -57.2 98.8 -58.7 98.8 C-62.7 98.8 -66.7 98.7 -70.7 98.7 C-74.8 98.7 -78.9 98.7 -83 98.7 C-91 98.7 -99 98.7 -107 98.7 C-107.1 99.2 -107.1 99.8 -107.2 100.4 C-112.3 149 -138.1 196.8 -176 227.7 C-180.8 231.3 -185.9 234.5 -191 237.7 C-191.7 238.1 -192.3 238.5 -193 238.9 C-219.9 255.8 -254 268.8 -286.1 262.4 C-301.8 258.4 -314.1 250.3 -323 236.7 C-329.8 224.5 -330.3 212.1 -327 198.9 C-322.7 184.6 -313.2 173.8 -300.2 166.7 C-296.2 164.6 -292.2 162.6 -288.1 160.7 C-264.1 149.2 -240.5 136.5 -229.7 110.7 C-228.8 107.9 -228.7 105.5 -229 102.7 C-231 100.7 -234.7 101.5 -237.4 101.5 C-237.9 101.5 -237.9 101.5 -240.5 101.5 C-241.1 101.5 -241.1 101.5 -243.8 101.5 C-255.6 101.6 -267.3 102.6 -279.1 103.7 C-291.6 104.8 -304.1 105.8 -316.7 105.9 C-317.6 105.9 -318.6 105.9 -319.5 105.9 C-333 105.8 -345.8 101.9 -355.8 92.6 C-366.8 80.8 -369.7 68 -369.3 52.5 C-368.6 37.9 -361.8 23.7 -351 13.7 C-329.4 -3.6 -305.9 -2.7 -279.7 -1.1 C-252.8 0.5 -226 1 -199.1 1 C-196.4 1 -193.8 1 -191.1 1 C-158.7 1 -126.5 -0.2 -94.3 -3.7 C-92.3 -3.9 -90.2 -4.2 -88.2 -4.4 C-77.4 -5.5 -66.8 -6.9 -56.1 -8.7 C-36.1 -12 -17.6 -11.6 0 0 Z " fill="#7737B1" transform="translate(1173.299,642.913) scale(0.27624)"/>
+<path d="M0 0 C9.3 7.8 15.1 17.5 16.9 29.5 C18 43.2 16.1 54.2 7.3 65 C-6.2 79.6 -22.1 83.1 -41.1 85.1 C-42.7 85.3 -44.3 85.4 -45.8 85.6 C-59.4 87.1 -73 88.3 -86.7 89 C-87.3 89.1 -88 89.1 -88.8 89.2 C-107.7 90.3 -126.7 90.2 -145.7 90.2 C-146.1 90.2 -146.1 90.2 -148.3 90.2 C-169.5 90.2 -190.8 90.1 -212 89.2 C-212.9 89.2 -213.8 89.2 -214.7 89.1 C-232.8 88.4 -251.9 86.7 -265.2 72.8 C-273.1 62.8 -278 50.8 -276.6 38 C-274.2 23.8 -267.7 11 -256 2.3 C-237 -10 -218.4 -11 -196.5 -9.5 C-149 -6.3 -99.8 -5.4 -52.5 -11.5 C-33.5 -13.8 -15.7 -11.6 0 0 Z " fill="#7737B1" transform="translate(1161.042,614.634) scale(0.27624)"/>
+<path d="M0 0 C7.5 5.3 13.5 12.9 15.2 22.2 C16.1 35.8 14.9 45.8 5.8 56.6 C-3.9 66.4 -15.6 74.1 -26.9 81.8 C-27.2 82 -27.2 82 -28.8 83.2 C-29.2 83.4 -29.2 83.4 -31.4 84.6 C-35.3 88.8 -35 93.5 -35.4 98.9 C-35.5 100.1 -35.7 101.3 -35.8 102.5 C-36 105.1 -36.2 107.6 -36.5 110.2 C-36.8 114.2 -37.2 118.1 -37.5 122.1 C-38.1 127.5 -38.6 132.9 -39.1 138.3 C-39.1 138.9 -39.2 139.6 -39.2 140.3 C-39.6 143.8 -39.9 147.2 -40.2 150.7 C-40.5 154.1 -40.8 157.6 -41.1 161 C-41.3 162.9 -41.5 164.8 -41.6 166.7 C-43.1 182.7 -45.6 196.9 -57.8 208.2 C-67.4 215.5 -78.8 218.4 -90.8 217.2 C-101.2 215.7 -109.4 211.6 -116.2 203.6 C-126.2 188.9 -122.6 171.6 -120.8 155.2 C-120.8 154.8 -120.8 154.8 -120.5 152.5 C-120 147.4 -119.4 142.3 -118.8 137.2 C-119.2 137.4 -119.2 137.4 -121.3 138.3 C-124.3 139.8 -127.3 141.2 -130.4 142.6 C-131.7 143.2 -133 143.9 -134.3 144.5 C-136.2 145.4 -138.1 146.3 -140 147.2 C-141.1 147.7 -142.3 148.2 -143.4 148.8 C-154.2 153.3 -167.2 154.4 -178.3 150.3 C-187 146.1 -193.7 139.2 -197.2 130.2 C-200.5 119.4 -199.6 108.4 -194.4 98.4 C-188.1 87.8 -179.8 81.7 -168.9 76.3 C-166.8 75.3 -164.8 74.2 -162.8 73.2 C-162.2 73 -162.2 73 -159.7 71.7 C-130.3 56.6 -102.3 38.7 -75.6 19.4 C-73.8 18.2 -72 16.9 -70.2 15.7 C-69.1 14.8 -67.9 14 -66.7 13.1 C-66.4 12.9 -66.4 12.9 -64.9 11.9 C-62.1 9.9 -59.3 7.8 -56.6 5.7 C-39.1 -7.8 -19.8 -12.2 0 0 Z " fill="#C02F91" transform="translate(1211.086,654.923) scale(0.27624)"/>
+<path d="M0 0 C9.1 6.7 14.5 13 16.8 24.2 C19.6 47.1 9.7 70.9 0.2 91.2 C-0.3 92.4 -0.8 93.5 -1.4 94.7 C-24.1 142.8 -68.9 180.8 -118.4 199 C-132 203.7 -146.5 205.9 -160.2 200.5 C-171.3 195.1 -177.5 186.6 -181.8 175.2 C-184.8 163.3 -181.7 152.2 -176 141.6 C-172.7 136.2 -168 132.7 -162.8 129.2 C-162 128.7 -161.2 128.2 -160.4 127.7 C-154.1 123.7 -147.4 120.5 -140.7 117.2 C-107.9 100.9 -79.7 77.5 -67.7 42 C-65.8 36.5 -64 30.9 -62.3 25.4 C-57.5 9.8 -57.5 9.8 -51.8 4.2 C-51.5 4 -51.5 4 -50.2 2.6 C-36.8 -10.3 -15.1 -9.5 0 0 Z " fill="#8BCB00" transform="translate(1274.622,656.840) scale(0.27624)"/>
+<path d="M0 0 C0.5 0.3 0.9 0.7 1.4 1 C4.4 3.3 7.4 5.6 10.5 7.8 C16.9 12.3 22.9 17.2 28.8 22.3 C31.7 24.7 34.6 27.1 37.5 29.5 C45.9 36.3 54.2 43.3 62.2 50.5 C63.4 51.5 64.5 52.4 65.7 53.3 C76.4 61.7 83.5 73.7 86 87 C87.9 105.7 83.4 121.8 71.7 136.7 C60.1 150.3 46.8 158.3 29.2 161.8 C9.4 163.3 -5.6 155.8 -20.3 143.4 C-23.8 140.4 -27.2 137.4 -30.6 134.3 C-32.7 132.3 -34.8 130.4 -37 128.5 C-41.2 124.9 -45.3 121.1 -49.4 117.4 C-51.5 115.5 -53.7 113.5 -55.9 111.6 C-60 108 -64.1 104.2 -68.1 100.5 C-72.7 96.3 -77.3 92.1 -82 88 C-80.7 85.1 -79.2 83 -76.9 80.7 C-76.3 80.1 -75.7 79.5 -75.1 78.9 C-74.4 78.2 -73.7 77.6 -73.1 76.9 C-72.4 76.2 -71.7 75.5 -71 74.8 C-68.8 72.7 -66.6 70.5 -64.4 68.4 C-62.2 66.2 -60.1 64 -57.9 61.9 C-56.5 60.5 -55.1 59.2 -53.8 57.9 C-53.5 57.5 -53.5 57.5 -51.9 56 C-51.4 55.5 -50.8 54.9 -50.3 54.4 C-49 53 -49 53 -48 51 C-47.3 51 -46.7 51 -46 51 C-45.3 49.7 -44.7 48.3 -44 47 C-42.4 45.2 -42.4 45.2 -40.5 43.4 C-39.9 42.7 -39.2 42 -38.5 41.4 C-37.8 40.7 -37 40 -36.3 39.2 C-31.6 34.7 -27.1 30 -22.8 25 C-18.9 20.6 -14.8 16.4 -10.8 12.2 C-7 8.2 -3.4 4.2 0 0 Z " fill="#FFC300" transform="translate(1056.442,666.025) scale(0.27624)"/>
+<path d="M0 0 C8.6 3.8 15.7 11.5 22.5 17.9 C25.8 20.9 29.1 23.7 32.5 26.5 C37 30.1 41.3 34 45.5 37.9 C48.8 40.9 52.1 43.7 55.5 46.5 C60.1 50.2 64.4 54 68.7 58 C72.2 61.3 75.9 64.5 79.7 67.5 C81 69 81 69 81 73 C79.7 74.6 79.7 74.6 77.9 76.2 C75.5 78.6 73.2 80.9 71 83.6 C51.9 105.5 26.1 122.8 -0.1 135.1 C-1.9 136 -3.7 136.8 -5.4 137.7 C-31.9 150.6 -60.2 159.2 -89 165 C-87.3 161.2 -84.8 158.1 -82.2 154.9 C-67.8 136.8 -54.7 118 -43 98 C-42.6 97.2 -42.1 96.5 -41.7 95.7 C-24.2 66 -6.4 34.3 0 0 Z " fill="#FDC300" transform="translate(1331.028,669.340) scale(0.27624)"/>
+<path d="M0 0 C10.4 6.6 14.4 14.8 17.8 26.2 C18.1 27 18.3 27.8 18.6 28.7 C19.4 31.2 20.1 33.7 20.8 36.2 C20.9 36.5 20.9 36.5 21.5 38.3 C25.2 50.5 27.8 63.7 22.4 75.7 C16.9 85 9.1 90.7 -1.1 93.8 C-10.7 95.7 -19.6 93.5 -28.2 89.1 C-41.9 79.5 -45.4 55.3 -48.2 40.2 C-48.9 28.3 -48.7 19.6 -41 10 C-30.9 -0.8 -14.2 -6.6 0 0 Z " fill="#8BCB00" transform="translate(1230.520,657.415) scale(0.27624)"/>
+<path d="M0 0 C9.2 8.6 14 27.2 14.9 39.5 C15.2 51.4 12.2 60.8 4.2 69.8 C-1.8 75.5 -9.6 78.2 -17.9 78.5 C-25.3 78.2 -32 75.2 -37.2 70 C-42.3 63.6 -44.3 56.3 -46.4 48.6 C-46.8 47.4 -47.1 46.2 -47.5 45 C-54.5 20.8 -54.5 20.8 -48.2 8 C-43.7 0.9 -37.3 -3 -29.4 -5.6 C-18.4 -7.6 -9.3 -5.7 0 0 Z " fill="#8BCB00" transform="translate(1250.434,655.251) scale(0.27624)"/></symbol></svg>
+<div class="app">
+  <header>
+    <h1 class="logo"><svg class="logo-svg" role="img" aria-label="Crosstick（クロスティック）"><use href="#cx-logo" width="100%" height="100%"/></svg></h1>
+    <p class="lead">ベトナム株のティッカーをパズルにできる</p>
+    <div class="hactions">
+      <button class="btn btn-tonal iconbtn" id="rulesBtn" type="button" aria-haspopup="dialog" aria-label="採点のしくみとプライバシー">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.3a2.9 2.9 0 1 1 4.4 2.5c-.9.6-1.6 1.1-1.6 2.3"/><circle cx="12" cy="17.4" r="0.6" fill="currentColor"/></svg>
+      </button>
+      <button class="btn btn-tonal" id="shootBtn" type="button" aria-label="画像を保存"><span class="full">画像を保存</span><span class="short" aria-hidden="true">保存</span></button>
+    </div>
+    <dialog class="dlg" id="rules" aria-labelledby="rulesTitle">
+      <div class="dlg-in">
+        <h2 id="rulesTitle">採点のしくみ</h2>
+        <table>
+          <thead><tr><th scope="col">銘柄ごとの点数（ほかの銘柄と重なる文字の数）</th><th scope="col">点数</th></tr></thead>
+          <tbody>
+            <tr><td>3文字すべて</td><td>+6点</td></tr>
+            <tr><td>2文字</td><td>+3点</td></tr>
+            <tr><td>1文字</td><td>+1点</td></tr>
+            <tr><td>0文字（右端に寄せます）</td><td class="neg">−3点</td></tr>
+          </tbody>
+        </table>
+        <p>総合スコアは、取りうる点数の幅の中での位置です。最低点（どの銘柄も重ならない）を0、上限点（ほかの銘柄にも出てくる文字がすべて重なる）を100として換算するので、銘柄数が多くても有利・不利になりにくい仕組みです。</p>
+        <h3>プライバシー</h3>
+        <p class="privacy">このサイトは、入力した銘柄コードや結果を含め、情報を収集・送信・保存しません。処理はすべてお使いの端末の中で行い、開くたびに初期の銘柄に戻ります。画像の保存も端末の中で作ります。なお、文字を表示するためにGoogle Fontsからフォントを読み込みます。また、サイトを配信するサーバーには、一般的なアクセスの記録が残ることがあります。</p>
+        <div class="dlg-actions"><button class="btn btn-filled" id="rulesClose" type="button">閉じる</button></div>
+      </div>
+    </dialog>
+  </header>
+
+  <main class="board" id="board">
+    <div class="lcol" id="lcol">
+      <div class="frame" id="frame">
+        <div class="badge" id="score" aria-live="polite"></div>
+        <svg class="frame-logo" aria-hidden="true"><use href="#cx-logo" width="100%" height="100%"/></svg>
+        <div class="stage" id="stage"></div>
+      </div>
+      <div class="under" id="under">
+        <fieldset class="grp">
+          <legend>見た目</legend>
+          <div class="seg" style="--n:3">
+            <input type="radio" name="look" id="l-text" value="text" checked><label for="l-text">文字だけ</label>
+            <input type="radio" name="look" id="l-plate" value="plate"><label for="l-plate">薄グレー</label>
+            <input type="radio" name="look" id="l-tile" value="tile"><label for="l-tile">タイル</label>
+          </div>
+        </fieldset>
+        <fieldset class="grp">
+          <legend>重なる文字の色</legend>
+          <div class="seg" style="--n:3">
+            <input type="radio" name="ov" id="o-split" value="split" checked><label for="o-split">2色</label>
+            <input type="radio" name="ov" id="o-single" value="single"><label for="o-single">単色</label>
+            <input type="radio" name="ov" id="o-black" value="black"><label for="o-black">全部黒字</label>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+    <aside class="rcol" id="rcol" aria-label="銘柄ごとの重なりと点数">
+      <div class="legend" id="legend"></div>
+      <div id="notes"></div>
+    </aside>
+  </main>
+
+  <section class="dock" aria-label="入力と設定">
+    <label class="sr-only" for="tickers">ティッカー（スペース、カンマ、改行で区切る）</label>
+    <textarea id="tickers" rows="1" spellcheck="false" autocomplete="off" autocapitalize="characters" placeholder="ティッカーを入力（例: SSI CTR VCI）"></textarea>
+    <div class="actions">
+      <button class="btn btn-vn" id="shuffle" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
+        再配置
+      </button>
+    </div>
+    <p class="hint" id="hint" aria-live="polite"></p>
+  </section>
+</div>
+
+<div class="shootbar" id="shootbar" role="toolbar" aria-label="画像を保存" hidden>
+  <span class="cap" aria-hidden="true">比率</span>
+  <div class="seg" style="--n:3">
+    <input type="radio" name="ratio" id="r-1" value="1:1" checked><label for="r-1">1:1</label>
+    <input type="radio" name="ratio" id="r-2" value="16:9"><label for="r-2">16:9</label>
+    <input type="radio" name="ratio" id="r-3" value="9:16"><label for="r-3">9:16</label>
+  </div>
+  <label class="tog" for="showScore"><input type="checkbox" id="showScore" role="switch"><span class="track" aria-hidden="true"></span><span class="tl">点数を入れる</span></label>
+  <button class="btn btn-filled" id="saveBtn" type="button" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
+    画像を保存
+  </button>
+  <button class="btn btn-tonal" id="shootClose" type="button">閉じる</button>
+  <span class="shootmsg" id="shootMsg" role="status"></span>
+</div>
+
+<script>
+/*CORE_START*/
+var PALETTE = ['#0083b1','#4e53a7','#7636a8','#be36a2','#b7395f','#cd6c2f','#fc5101','#ff9100','#f7c30b','#8bc80b','#00b29c'];
+var GREY = '#cfd4d9';
+
+function darken(hex, f) {
+  var c = [1,3,5].map(function(i){ return Math.round(parseInt(hex.substr(i,2),16) * (1 - f)); });
+  return '#' + c.map(function(v){ return ('0' + v.toString(16)).slice(-2); }).join('');
+}
+// 11色を4つ飛ばしで使い、入力順で隣り合う銘柄の色相が離れるようにする
+function colorFor(i) {
+  var base = PALETTE[(i * 4) % 11];
+  var cycle = Math.floor(i / 11);
+  return cycle ? darken(base, Math.min(0.55, 0.25 * cycle)) : base;
+}
+function lum(hex) {
+  var c = [1,3,5].map(function(i){ return parseInt(hex.substr(i,2),16) / 255; })
+    .map(function(v){ return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
+function contrast(a, b) {
+  var x = lum(a), y = lum(b);
+  if (x < y) { var t = x; x = y; y = t; }
+  return (x + 0.05) / (y + 0.05);
+}
+function inkFor(cols) {
+  var dark = '#16191c', light = '#ffffff';
+  function worst(c) { return Math.min.apply(null, cols.map(function(col){ return contrast(c, col); })); }
+  return worst(dark) >= worst(light) ? dark : light;
+}
+
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function hashStr(s) {
+  var h = 2166136261;
+  for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+
+function parseTickers(text) {
+  var raw = text.normalize('NFKC').split(/[\s,、，;；\/]+/).map(function(s){ return s.trim().toUpperCase(); }).filter(Boolean);
+  var words = [], bad = [];
+  raw.forEach(function(t) {
+    if (/^[A-Z0-9]{2,6}$/.test(t)) { if (words.indexOf(t) < 0) words.push(t); }
+    else if (bad.indexOf(t) < 0) bad.push(t);
+  });
+  var over = words.length > 40;
+  return { words: words.slice(0, 40), bad: bad, over: over };
+}
+
+// dir 0 = 横, 1 = 縦
+function tryBuild(words, rng, clean) {
+  var cells = new Map(), placed = [];
+  var areaW = [0.1, 0.5, 1][Math.floor(rng() * 3)];
+  var temp = [3, 10, 25][Math.floor(rng() * 3)];
+  var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  function key(x, y) { return x + ',' + y; }
+
+  function check(wi, x, y, dir) {
+    var w = words[wi], L = w.length, dx = dir === 0 ? 1 : 0, dy = dir === 1 ? 1 : 0, ov = 0;
+    for (var k = 0; k < L; k++) {
+      var cx = x + dx * k, cy = y + dy * k, c = cells.get(key(cx, cy));
+      if (c) {
+        if (c.ch !== w[k] || c.dirs[dir]) return null;
+        ov++;
+      } else if (clean) {
+        if (cells.has(key(cx + dy, cy + dx)) || cells.has(key(cx - dy, cy - dx))) return null;
+      }
+    }
+    if (ov === 0) return null;
+    if (clean && (cells.has(key(x - dx, y - dy)) || cells.has(key(x + dx * L, y + dy * L)))) return null;
+    var nx0 = Math.min(minX, x), ny0 = Math.min(minY, y);
+    var nx1 = Math.max(maxX, x + dx * (L - 1)), ny1 = Math.max(maxY, y + dy * (L - 1));
+    var W = nx1 - nx0 + 1, H = ny1 - ny0 + 1;
+    return { wi: wi, x: x, y: y, dir: dir, cost: areaW * (W * H + 2 * Math.abs(W - 1.25 * H)) - ov * 5 };
+  }
+  function place(wi, x, y, dir) {
+    var w = words[wi], dx = dir === 0 ? 1 : 0, dy = dir === 1 ? 1 : 0;
+    for (var k = 0; k < w.length; k++) {
+      var cx = x + dx * k, cy = y + dy * k, kk = key(cx, cy), c = cells.get(kk);
+      if (!c) { c = { ch: w[k], dirs: [false, false], owners: [], x: cx, y: cy }; cells.set(kk, c); }
+      c.dirs[dir] = true;
+      c.owners.push({ wi: wi, dir: dir, order: placed.length });
+      if (cx < minX) minX = cx; if (cx > maxX) maxX = cx;
+      if (cy < minY) minY = cy; if (cy > maxY) maxY = cy;
+    }
+    placed.push({ wi: wi, x: x, y: y, dir: dir });
+  }
+
+  // 共通する文字を持つ相手が少ない銘柄ほど、早めに置く
+  var partners = words.map(function(w, i) {
+    var n = 0;
+    words.forEach(function(o, j) {
+      if (i !== j && w.split('').some(function(ch){ return o.indexOf(ch) >= 0; })) n++;
+    });
+    return n + rng() * 2.5;
+  });
+  var rem = words.map(function(_, i){ return i; });
+  rem.sort(function(a, b){ return partners[a] - partners[b]; });
+  if (rng() < 0.5) {
+    var f = Math.floor(rng() * rem.length), tmp = rem[0]; rem[0] = rem[f]; rem[f] = tmp;
+  }
+  var first = rem.shift();
+  place(first, 0, 0, rng() < 0.5 ? 0 : 1);
+
+  function bestFor(wi) {
+    var best = null, w = words[wi];
+    for (var k = 0; k < w.length; k++) {
+      cells.forEach(function(c) {
+        if (c.ch !== w[k]) return;
+        for (var dir = 0; dir < 2; dir++) {
+          if (c.dirs[dir]) continue;
+          var x = c.x - (dir === 0 ? k : 0), y = c.y - (dir === 1 ? k : 0);
+          var r = check(wi, x, y, dir);
+          if (!r) continue;
+          r.cost += rng() * temp;
+          if (!best || r.cost < best.cost) best = r;
+        }
+      });
+    }
+    return best;
+  }
+
+  // 交差できる場所がない銘柄は、最後の手段として既存の文字に接するように置く（ぎゅっと詰めるときだけ）
+  function touchFor(wi) {
+    var best = null, w = words[wi], L = w.length;
+    cells.forEach(function(c) {
+      for (var dir = 0; dir < 2; dir++) {
+        var dx = dir === 0 ? 1 : 0, dy = dir === 1 ? 1 : 0;
+        for (var k = 0; k < L; k++) {
+          // k文字目が、cの上下左右のどれかに来る置き方を試す
+          var nb = [[1,0],[-1,0],[0,1],[0,-1]];
+          for (var q = 0; q < 4; q++) {
+            var px = c.x + nb[q][0], py = c.y + nb[q][1];
+            var x = px - dx * k, y = py - dy * k, ok = true;
+            for (var m = 0; m < L; m++) {
+              if (cells.has(key(x + dx * m, y + dy * m))) { ok = false; break; }
+            }
+            if (!ok) continue;
+            var nx0 = Math.min(minX, x), ny0 = Math.min(minY, y);
+            var nx1 = Math.max(maxX, x + dx * (L - 1)), ny1 = Math.max(maxY, y + dy * (L - 1));
+            var W = nx1 - nx0 + 1, H = ny1 - ny0 + 1;
+            var cost = areaW * (W * H + 2 * Math.abs(W - 1.25 * H)) + rng() * temp;
+            if (!best || cost < best.cost) best = { wi: wi, x: x, y: y, dir: dir, cost: cost };
+          }
+        }
+      }
+    });
+    return best;
+  }
+
+  if (rng() < 0.5) {
+    // 全ての残り銘柄から、いちばん盤面が小さく済む置き方を選ぶ
+    while (rem.length) {
+      var best = null;
+      for (var a = 0; a < rem.length; a++) {
+        var r = bestFor(rem[a]);
+        if (r && (!best || r.cost < best.cost)) best = r;
+      }
+      if (!best) break;
+      place(best.wi, best.x, best.y, best.dir);
+      rem.splice(rem.indexOf(best.wi), 1);
+    }
+  } else {
+    // 並び順どおりに置く。置けなかった銘柄は後で再挑戦する
+    var progress = true;
+    while (rem.length && progress) {
+      progress = false;
+      rem.slice().forEach(function(wi) {
+        var r = bestFor(wi);
+        if (!r) return;
+        place(r.wi, r.x, r.y, r.dir);
+        rem.splice(rem.indexOf(wi), 1);
+        progress = true;
+      });
+    }
+  }
+
+  var touched = 0;
+  if (!clean) {
+    var again = true;
+    while (rem.length && again) {
+      again = false;
+      var pick = null;
+      for (var b = 0; b < rem.length; b++) {
+        var cx = bestFor(rem[b]) || null;
+        if (cx) { pick = cx; break; }
+      }
+      if (!pick) {
+        for (var b2 = 0; b2 < rem.length; b2++) {
+          var tc = touchFor(rem[b2]);
+          if (tc) { tc.touch = true; pick = tc; touched++; break; }
+        }
+      }
+      if (pick) { place(pick.wi, pick.x, pick.y, pick.dir); if (pick.touch) placed[placed.length - 1].touch = true; rem.splice(rem.indexOf(pick.wi), 1); again = true; }
+    }
+  }
+
+  // 重なる文字がない銘柄（接しただけ・置けなかった銘柄）は、かたまりの右端に1列あけて寄せる
+  var lone = [];
+  placed = placed.filter(function(p) {
+    var dx = p.dir === 0 ? 1 : 0, dy = p.dir === 1 ? 1 : 0, o = 0, k;
+    for (k = 0; k < words[p.wi].length; k++) if (cells.get(key(p.x + dx * k, p.y + dy * k)).owners.length > 1) o++;
+    if (o > 0) return true;
+    for (k = 0; k < words[p.wi].length; k++) cells.delete(key(p.x + dx * k, p.y + dy * k));
+    lone.push(p.wi);
+    return false;
+  });
+  rem.forEach(function(wi) { lone.push(wi); });
+  rem = [];
+  if (lone.length) {
+    lone.sort(function(a, b) { return a - b; });
+    minX = Infinity; maxX = -Infinity; minY = Infinity; maxY = -Infinity;
+    cells.forEach(function(c) {
+      if (c.x < minX) minX = c.x; if (c.x > maxX) maxX = c.x;
+      if (c.y < minY) minY = c.y; if (c.y > maxY) maxY = c.y;
+    });
+    if (!cells.size) { minX = 0; maxX = -2; minY = 0; maxY = -1; }
+    var lx = maxX + 2, ly = minY;
+    lone.forEach(function(wi, i) { place(wi, lx, ly + i, 0); });
+  }
+
+  var cross = 0;
+  cells.forEach(function(c){ if (c.owners.length > 1) cross++; });
+  var W = maxX - minX + 1, H = maxY - minY + 1;
+
+  // 採点: 銘柄ごとに「他の銘柄と重なっている文字数」を数える
+  var per = {}, raw = 0, max = 0;
+  function addPer(wi, o) {
+    var L = words[wi].length, pts = pointsFor(o), mx = pointsFor(L);
+    per[wi] = { o: o, L: L, pts: pts, max: mx };
+    raw += pts; max += mx;
+  }
+  var touchedN = 0;
+  placed.forEach(function(p) {
+    var dx = p.dir === 0 ? 1 : 0, dy = p.dir === 1 ? 1 : 0, o = 0;
+    for (var k = 0; k < words[p.wi].length; k++) {
+      if (cells.get(key(p.x + dx * k, p.y + dy * k)).owners.length > 1) o++;
+    }
+    p.touch = o === 0;
+    if (o === 0) touchedN++;
+    addPer(p.wi, o);
+  });
+  rem.forEach(function(wi) { addPer(wi, 0); });
+
+  return {
+    placed: placed, cells: cells, minX: minX, minY: minY, W: W, H: H, cross: cross, unplaced: rem, touched: touchedN,
+    per: per, raw: raw, max: max, score100: Math.round(raw / max * 100), area: W * H + 2 * Math.abs(W - 1.25 * H)
+  };
+}
+
+// 重なった文字が多いほど高得点（1文字+1、2文字+3、3文字+6）。まったく重ならない銘柄は-3
+function pointsFor(o) { return o === 0 ? -3 : o * (o + 1) / 2; }
+
+// 銘柄セットごとの点数の幅。下限は「全銘柄が重ならない」、上限は「ほかの銘柄にも使われている文字が全部重なる」場合。
+// 銘柄数が多いほど有利にならないよう、総合スコアはこの幅の中での位置（0〜100）で出す
+function scoreRange(words) {
+  var ub = 0;
+  words.forEach(function(w, i) {
+    var o = 0;
+    for (var k = 0; k < w.length; k++) {
+      var ch = w[k];
+      if (words.some(function(x, j){ return j !== i && x.indexOf(ch) >= 0; })) o++;
+    }
+    ub += pointsFor(o);
+  });
+  return { min: -3 * words.length, ub: ub };
+}
+
+function buildLayout(words, pattern, clean) {
+  if (!words.length) return null;
+  var rng = mulberry32((Math.imul(pattern, 2654435761) ^ hashStr(words.join(',') + (clean ? 'c' : 't'))) >>> 0);
+  var tries = [];
+  for (var t = 0; t < 250; t++) tries.push(tryBuild(words, rng, clean));
+  var maxPlaced = Math.max.apply(null, tries.map(function(r){ return r.placed.length; }));
+  tries = tries.filter(function(r){ return r.placed.length === maxPlaced; });
+  var maxRaw = Math.max.apply(null, tries.map(function(r){ return r.raw; }));
+  // パターン1は最高得点の配置。2以降は最高得点から2点以内の配置からランダムに選び、見た目に変化をつける
+  var slack = pattern === 1 ? 0 : 2;
+  var range = scoreRange(words);
+  tries.forEach(function(r) {
+    r.min = range.min; r.ub = range.ub;
+    r.score100 = range.ub > range.min ? Math.round((r.raw - range.min) / (range.ub - range.min) * 100) : null;
+  });
+  var pool = tries.filter(function(r){ return r.raw >= maxRaw - slack; });
+  var minArea = Math.min.apply(null, pool.map(function(r){ return r.area; }));
+  pool = pool.filter(function(r){ return r.area <= minArea + 6; });
+  if (pattern === 1) {
+    pool.sort(function(a, b){ return b.raw - a.raw || a.area - b.area; });
+    return pool[0];
+  }
+  return pool[Math.floor(rng() * pool.length)];
+}
+/*CORE_END*/
+
+(function () {
+  var DEFAULT = 'SSI CTR VCI FRT FPT DGW DPM MWG HPG VPB';
+  var $ = function (id) { return document.getElementById(id); };
+  var ta = $('tickers'), hint = $('hint'), stage = $('stage'),
+      legend = $('legend'), notes = $('notes'), scoreEl = $('score'),
+      board = $('board'), lcol = $('lcol'), frame = $('frame'), under = $('under'), rcol = $('rcol'), shootbar = $('shootbar');
+  // ベトナム株市場（HOSE・HNX・UPCoM）に上場している3文字コード（Vietstock Finance調べ、2026-11-03時点。1,543件のうち3文字の1,519件）
+  var VN = {};
+  `
+A32 AAA AAH AAM AAN AAS AAT AAV ABB ABC ABI ABR ABS ABT ABW ACB ACC ACE ACG ACL ACM ACS
+ACV ADC ADG ADP ADS AFX AG1 AGF AGG AGM AGP AGR AGX AIC AIG ALC ALT ALV AMC AME AMP AMS
+AMV ANI ANT ANV APC APF APG APH API APL APP APS APT ARM ART ASG ASM ASP AST ATA ATG ATS
+AVC AVG BAB BAF BAL BAX BBH BBM BBS BBT BCA BCB BCC BCE BCF BCM BCP BCV BDG BDT BDW BED
+BEL BFC BGE BGW BHA BHC BHG BHH BHI BHK BHN BHP BIC BID BIG BIO BKC BKG BLF BLI BLN BLT
+BMC BMD BMF BMG BMI BMJ BMK BMP BMS BMV BNA BNW BOT BPC BQB BQP BRC BRR BRS BSA BSD BSG
+BSH BSI BSL BSP BSQ BSR BT1 BT6 BTB BTD BTG BTH BTN BTP BTS BTT BTU BTV BTW BVB BVG BVH
+BVL BVN BVS BWA BWE BWS BXH C22 C32 C47 C4G C69 C92 CAD CAG CAN CAP CAR CAT CBI CBS CC1
+CCA CCC CCI CCL CCM CCP CCR CCS CCT CCV CDC CDG CDN CDO CDP CDR CEN CEO CET CFM CFV CGV
+CH5 CHC CHP CHS CI5 CIA CID CIG CII CIP CJC CK8 CKA CKD CKG CKV CLC CLH CLI CLL CLM CLW
+CLX CMC CMD CMF CMG CMI CMK CMM CMN CMP CMS CMT CMV CMW CMX CNA CNC CNG CNN CNT COM CPA
+CPC CPH CPI CQN CQT CRC CRE CRV CSC CSI CSM CST CSV CT3 CT6 CTB CTD CTF CTG CTI CTP CTR
+CTS CTT CTW CTX CVN CVT CX8 D11 D2D DAC DAD DAE DAG DAH DAS DAT DBC DBD DBM DBT DC1 DC2
+DC4 DCF DCG DCH DCL DCM DCR DCS DCT DCV DDB DDG DDH DDM DDN DDV DFC DFF DGC DGT DGW DHA
+DHB DHC DHD DHG DHM DHN DHP DHT DIC DID DIG DIH DKC DKG DL1 DLD DLG DLR DLT DM7 DMC DMN
+DMX DNA DNC DND DNE DNH DNL DNM DNN DNP DNT DNW DOC DOP DP1 DP2 DP3 DPC DPG DPH DPM DPP
+DPR DQC DRC DRG DRH DRI DRL DS3 DSC DSD DSE DSG DSH DSN DSP DST DTA DTC DTD DTG DTH DTI
+DTK DTL DTP DTR DTT DUS DVC DVG DVM DVN DVP DVV DVW DWC DWS DXG DXL DXP DXS DXV E12 E29
+EBS ECI ECO EFI EGL EIB EIC EID EIN ELC EME EMG EMS EVE EVF EVG EVS F88 FBC FCC FCM FCN
+FCS FDC FGL FHN FHS FIC FID FIR FIT FMC FOC FOX FPT FRC FRM FRT FSO FT1 FTI FTM FTS G20
+G36 GAS GCB GCF GDH GDT GDW GEE GEG GEL GER GEX GGG GH3 GHC GIC GIL GKM GLC GLT GLW GMA
+GMC GMD GMH GMX GND GPC GSM GSP GTA GTD GTS GTT GTX GVR GVT H11 HAC HAD HAF HAG HAH HAM
+HAN HAP HAR HAS HAT HAV HAX HBC HBD HBH HBS HC1 HC3 HCC HCD HCI HCM HCT HD2 HD6 HD8 HDA
+HDB HDC HDG HDM HDP HDW HEC HEJ HEP HES HEV HFB HFC HFX HGM HGT HHB HHC HHG HHN HHP HHS
+HHV HID HII HIO HJC HJS HKB HKT HLA HLB HLC HLD HLO HLS HLT HLY HMC HMD HMG HMH HMR HMS
+HNA HNB HND HNF HNG HNI HNM HNP HNR HOM HOT HPA HPB HPD HPG HPH HPI HPO HPP HPT HPW HPX
+HQC HRB HRC HSA HSG HSL HSM HSP HSV HT1 HTC HTE HTG HTI HTL HTM HTN HTP HTT HTV HU1 HU3
+HU4 HU6 HUB HUG HUT HVA HVH HVN HVT HVX HWS IBD ICC ICF ICG ICI ICN ICT IDC IDI IDJ IDP
+IDV IFS IJC ILA ILB ILC ILS IME IMP IN4 INC INN IPA IRC ISG ISH IST ITA ITC ITD ITQ ITS
+IVS JOS JVC KAI KBC KCB KDC KDH KDM KGM KHD KHG KHP KHS KHW KHX KIP KKC KLB KMR KMT KOS
+KPF KSB KSD KSF KSQ KST KSV KTC KTL KTS KTT KVC L10 L12 L14 L18 L35 L40 L43 L45 L61 L62
+L63 LAF LAI LAS LAW LBE LBM LCD LCG LCM LDG LDP LDW LEC LG9 LGC LGL LHC LHG LIC LIG LIX
+LKW LLM LM3 LM7 LM8 LMC LMH LMI LNC LO5 LPB LPS LPT LQN LSG LSS LTC LUT M10 MA1 MAC MAS
+MBB MBG MBN MBS MBT MCC MCF MCG MCH MCM MCO MCP MDA MDC MDF MDG MEC MED MEF MEL MES MFS
+MGC MGG MGR MH3 MHC MHL MIC MIE MIG MKP MKV MLC MLS MML MNB MND MPC MPT MPY MQB MQN MRF
+MSB MSH MSN MSR MST MTA MTB MTG MTH MTL MTP MTS MTV MVB MVC MVN MWG MZG NAB NAC NAF NAG
+NAP NAS NAU NAV NAW NBB NBC NBE NBP NBT NBW NCG NCS NCT ND2 NDC NDN NDP NDT NDW NDX NED
+NET NFC NHA NHC NHD NHH NHT NHV NJC NKG NLG NLS NNC NNT NO1 NOS NQB NQN NRC NSC NSG NSH
+NSL NSS NST NT2 NTC NTF NTH NTL NTP NTT NTW NUE NVB NVL NVP NVT NWT NXT OCB OCH ODE OGC
+OIL ONE ONW OPC ORS PAC PAI PAN PAP PAS PAT PBC PBP PBT PC1 PCB PCC PCE PCF PCG PCH PCM
+PCT PDB PDC PDN PDR PDV PEG PEN PEQ PET PFL PGB PGC PGD PGI PGN PGS PGT PGV PHC PHH PHN
+PHP PHR PHS PIA PIC PID PIS PIT PIV PJC PJS PJT PLA PLC PLE PLO PLP PLX PMB PMC PMG PMJ
+PMP PMS PMT PMW PNC PND PNG PNJ PNP PNT POB POM POS POT POV POW PPC PPE PPH PPI PPP PPS
+PPT PPY PQN PRC PRE PRO PRT PSB PSC PSD PSE PSI PSL PSN PSP PSW PTB PTC PTD PTE PTG PTH
+PTI PTL PTM PTO PTP PTS PTT PTV PTX PV2 PVB PVC PVD PVE PVG PVH PVI PVL PVM PVO PVP PVR
+PVS PVT PVV PVX PVY PWA PWS PXA PXI PXL PXM PXS PXT QBS QCC QCG QHD QHW QNC QNP QNS QNT
+QNU QNW QPH QSP QST QTC QTP RAL RAT RBC RCC RCL REE RGG RIC RTB RYG S12 S4A S55 S72 S74
+S99 SAB SAC SAF SAL SAM SAS SAV SB1 SBA SBB SBD SBG SBH SBL SBM SBR SBS SBT SBV SC5 SCC
+SCD SCG SCI SCJ SCL SCO SCR SCS SD2 SD3 SD4 SD5 SD6 SD7 SD8 SD9 SDA SDC SDD SDG SDK SDN
+SDP SDT SDU SDV SDY SEA SEB SED SEP SFC SFG SFI SFN SGB SGC SGD SGH SGI SGN SGP SGR SGS
+SGT SHA SHB SHC SHE SHI SHN SHP SHS SID SIG SII SIP SIV SJ1 SJD SJE SJF SJG SJM SJS SKG
+SKH SKN SKV SLD SLS SMA SMB SMC SMN SMT SNC SNZ SP2 SPB SPC SPD SPH SPI SPM SPV SRA SRB
+SRC SRF SSB SSC SSG SSH SSI SSM ST8 STB STC STD STG STH STK STP STS STT STW SVC SVD SVG
+SVH SVN SVT SWC SZB SZC SZE SZG SZL TA6 TA9 TAB TAH TAL TAR TAW TBC TBD TBR TBW TCB TCD
+TCH TCI TCJ TCK TCL TCM TCO TCR TCT TCW TCX TD6 TDB TDC TDF TDG TDH TDM TDP TDS TDT TDW
+TED TEG TET TFC TGG TGP TH1 THB THD THG THM THN THP THS THT THU THW TID TIE TIG TIN TIP
+TIS TIX TJC TKA TKU TL4 TLD TLG TLH TLP TMB TMC TMG TMP TMS TMT TMX TN1 TNA TNB TNC TNG
+TNH TNI TNP TNS TNT TNV TNW TOP TOS TOT TOW TPB TPC TPP TPS TQW TR1 TRA TRC TRS TRT TRV
+TS3 TSA TSB TSC TSD TSG TSJ TST TT6 TTA TTB TTC TTD TTE TTF TTG TTH TTL TTN TTS TTT TTZ
+TUG TV1 TV2 TV3 TV4 TV6 TVA TVB TVC TVD TVG TVH TVM TVN TVS TVT TW3 TXM TYA UCT UDC UDJ
+UDL UEM UIC ULG UMC UNI UPC UPH UPS USC USD UTT UXC V12 V21 V68 VAB VAF VAV VBB VBC VBG
+VBH VBT VC1 VC2 VC3 VC6 VC7 VC9 VCA VCB VCC VCE VCF VCG VCI VCK VCM VCP VCR VCS VCT VCX
+VDB VDG VDL VDN VDP VDS VDT VE1 VE3 VE4 VE9 VEA VEC VEF VES VET VFC VFG VFR VFS VGC VGG
+VGI VGL VGP VGR VGS VGT VGV VHC VHD VHE VHF VHG VHH VHL VHM VIB VIC VID VIE VIF VIG VIM
+VIN VIP VIR VIT VIW VIX VJC VKC VLA VLB VLC VLG VLP VLS VLW VMA VMC VMD VMG VMK VMS VMT
+VNA VNB VNC VND VNE VNF VNG VNH VNI VNL VNM VNP VNR VNS VNT VNX VNY VNZ VOS VPA VPB VPC
+VPD VPG VPH VPI VPL VPR VPS VPW VPX VQC VRC VRE VRG VSA VSC VSE VSF VSG VSH VSI VSM VSN
+VST VTA VTB VTC VTD VTE VTG VTH VTI VTJ VTK VTM VTO VTP VTQ VTR VTV VTX VTZ VUA VVN VVS
+VW3 VWS VXB VXP VXT WCS WSB WSS WTC X20 X26 X77 XDH XHC XLV XMC XMD XMP XPH YBC YBM YEG
+YTC
+  `.split(/\s+/).forEach(function (t) { if (t) VN[t] = 1; });
+  var words = [], layout = null, pattern = 1, focus = null, timer = null;
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function opt(name) { return document.querySelector('input[name="' + name + '"]:checked').value; }
+
+  function wordInfo() {
+    var info = {};
+    if (layout) layout.placed.forEach(function (p, order) { info[p.wi] = { dir: p.dir, order: order, touch: !!p.touch }; });
+    return info;
+  }
+  function wcolor(wi) { return (focus === null || focus === wi) ? colorFor(wi) : GREY; }
+
+  var S = 72;
+  // 盤面の描画データを作る。画面（SVG）と画像保存（canvas）の両方で同じものを使う
+  function buildOps() {
+    var s = S, pad = 0.6 * s, m = 0.14 * s;
+    var VW = layout.W * s + pad * 2, VH = layout.H * s + pad * 2;
+    var look = opt('look'), tile = look === 'tile', plate = look === 'plate', ovm = opt('ov'), black = ovm === 'black', split0 = ovm !== 'single';
+    var groups = [], clips = {}, list = [];
+    layout.cells.forEach(function (c) { list.push(c); });
+    list.sort(function (a, b) { return a.owners[0].order - b.owners[0].order; });
+    list.forEach(function (c) {
+      var x0 = pad + (c.x - layout.minX) * s, y0 = pad + (c.y - layout.minY) * s;
+      var o = c.owners.slice().sort(function (a, b) { return a.dir - b.dir; }); // 横が先
+      var two = split0 && o.length > 1;
+      var cA = wcolor(o[0].wi), cB = two ? wcolor(o[1].wi) : null;
+      if (!split0 && o.length > 1) cA = wcolor(c.owners[0].wi);
+      if (focus !== null) {
+        // 強調中は、選んだ銘柄が通る文字をその銘柄の単色にする（斜めに分けない）
+        two = false;
+        cA = c.owners.some(function (q) { return q.wi === focus; }) ? colorFor(focus) : GREY;
+      }
+      var cid = 'k' + (c.x - layout.minX) + '_' + (c.y - layout.minY), items = [];
+      if (two) clips[cid] = [[x0 + s + m, y0 - m], [x0 + s + m, y0 + s + m], [x0 - m, y0 + s + m]];
+      var cx = x0 + s / 2;
+      if (tile) {
+        var t = s * 0.9, off = (s - t) / 2, fs = s * 0.78, ty = y0 + s / 2 + fs * 0.357;
+        items.push({ k: 'rect', x: x0 + off, y: y0 + off, w: t, h: t, r: s * 0.16, f: cA });
+        if (two) items.push({ k: 'rect', x: x0 + off, y: y0 + off, w: t, h: t, r: s * 0.16, f: cB, clip: cid });
+        items.push({ k: 'text', x: cx, y: ty, fs: fs, f: black ? '#16191c' : '#ffffff', w: 800, ch: c.ch });
+      } else {
+        var f2 = (plate ? 0.78 : 0.92) * s, ty2 = y0 + s / 2 + f2 * 0.357;
+        if (plate) {
+          var pt = s * 0.9, po = (s - pt) / 2;
+          items.push({ k: 'rect', x: x0 + po, y: y0 + po, w: pt, h: pt, r: s * 0.16, f: '@plate' });
+        }
+        if (black) {
+          // 全部黒字: 色は板やタイルに任せ、文字はすべて黒（ダークテーマでは明るい文字色）にする
+          var on = focus === null || c.owners.some(function (q) { return q.wi === focus; });
+          items.push({ k: 'text', x: cx, y: ty2, fs: f2, f: on ? '@ink' : GREY, w: 900, ch: c.ch });
+        } else {
+          items.push({ k: 'text', x: cx, y: ty2, fs: f2, f: cA, w: 900, ch: c.ch });
+          if (two) items.push({ k: 'text', x: cx, y: ty2, fs: f2, f: cB, w: 900, ch: c.ch, clip: cid });
+        }
+      }
+      groups.push({ order: c.owners[0].order, items: items });
+    });
+    return { VW: VW, VH: VH, groups: groups, clips: clips };
+  }
+
+  function opsToSvg(b, animate, label) {
+    var defs = '', body = '';
+    Object.keys(b.clips).forEach(function (id) {
+      defs += '<clipPath id="' + id + '"><polygon points="' + b.clips[id].map(function (q) { return q[0] + ',' + q[1]; }).join(' ') + '"/></clipPath>';
+    });
+    b.groups.forEach(function (g) {
+      body += '<g class="pop" style="--o:' + g.order + '">';
+      g.items.forEach(function (it) {
+        var clip = it.clip ? ' clip-path="url(#' + it.clip + ')"' : '';
+        if (it.k === 'rect') {
+          body += '<rect' + (it.f === '@plate' ? ' class="plate"' : ' fill="' + it.f + '"') + ' x="' + it.x + '" y="' + it.y + '" width="' + it.w + '" height="' + it.h + '" rx="' + it.r + '"' + clip + '/>';
+        } else {
+          body += '<text class="g' + (it.w === 800 ? ' t' : '') + '" x="' + it.x + '" y="' + it.y + '" text-anchor="middle" font-size="' + it.fs + '" ' +
+            (it.f === '@ink' ? 'style="fill:var(--on-surface)"' : 'fill="' + it.f + '"') + clip + '>' + it.ch + '</text>';
+        }
+      });
+      body += '</g>';
+    });
+    return '<svg id="puzzle" class="' + (animate ? 'anim' : '') + '" viewBox="0 0 ' + b.VW + ' ' + b.VH +
+      '" role="img" aria-label="Crosstick。' + label + '"><defs>' + defs + '</defs>' + body + '</svg>';
+  }
+
+  function render(animate) {
+    if (!layout) {
+      stage.innerHTML = '<p class="empty">ティッカーを入力すると、ここにパズルができます。</p>';
+      notes.innerHTML = ''; legend.innerHTML = ''; scoreEl.innerHTML = '';
+      fit();
+      return;
+    }
+    var label = layout.placed.map(function (p) { return words[p.wi] + (p.dir === 0 ? '(横)' : '(縦)'); }).join('、');
+    stage.innerHTML = opsToSvg(buildOps(), animate, label);
+    renderScore(animate);
+    renderLegend(wordInfo());
+    renderNotes();
+    fit();
+  }
+
+  function pts(n) { return (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n); }
+
+  function countUp(el, to, animate) {
+    if (!animate || reduced) { el.textContent = to; return; }
+    var t0 = performance.now(), dur = 700;
+    el.textContent = 0;
+    (function step(now) {
+      var k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = Math.round(to * e);
+      if (k < 1) requestAnimationFrame(step);
+    })(t0);
+  }
+
+  function renderScore(animate) {
+    if (layout.score100 === null) {
+      scoreEl.innerHTML = '<div class="sc-sub">共通する文字がないため、採点できません。</div>';
+      return;
+    }
+    scoreEl.innerHTML =
+      '<span class="sr-only">スコア' + layout.score100 + '点。</span>' +
+      '<div class="sc-main" aria-hidden="true"><span class="sc-num"></span><span class="sc-unit">点</span></div>';
+    countUp(scoreEl.querySelector('.sc-num'), layout.score100, animate);
+  }
+
+  function renderLegend(info) {
+    if (!layout) return;
+    info = info || wordInfo();
+    legend.innerHTML = words.map(function (w, i) {
+      var p = info[i], sc = layout.per[i];
+      var d = p ? (p.dir === 0 ? '横' : '縦') : '未配置';
+      var label = w + ' ' + d + ' 重なり' + sc.o + '/' + sc.L + ' ' + pts(sc.pts) + '点';
+      return '<button type="button" class="chip' + (p ? '' : ' off') + (focus !== null && focus !== i ? ' dim' : '') + '" data-i="' + i + '" aria-pressed="' + (focus === i) + '" aria-label="' + label + '" title="' + label + '" style="--c:' + colorFor(i) + '">' +
+        '<span class="sw" aria-hidden="true"></span><span class="tk">' + w + '</span><span class="dir">' + d + '</span>' +
+        '<span class="pt ' + (sc.pts < 0 ? 'm3' : sc.pts >= 6 ? 'p6' : sc.pts >= 3 ? 'p3' : 'p1') + '">' + pts(sc.pts) + '</span></button>';
+    }).join('');
+  }
+
+  function renderNotes() {
+    var out = '';
+    if (layout) {
+      var zero = layout.placed.filter(function (p) { return p.touch; }).map(function (p) { return words[p.wi]; });
+      if (zero.length) {
+        out += '<p class="note">' + zero.join('、') + ' は、ほかの銘柄と重なる文字がないため、右端に寄せました（減点）。「再配置」で重なる形が見つかることがあります。</p>';
+      }
+    }
+    notes.innerHTML = out;
+  }
+
+  function generate(animate) {
+    var p = parseTickers(ta.value);
+    focus = null;
+    var msgs = [], known = [], notVn = [];
+    p.words.forEach(function (w) { if (VN[w]) known.push(w); else notVn.push(w); });
+    words = known;
+    if (notVn.length) msgs.push('ベトナム株市場（HOSE・HNX・UPCoM）にないため除外しました: ' + notVn.join(', '));
+    if (p.bad.length) msgs.push('英数字2〜6文字ではないため除外しました: ' + p.bad.join(', '));
+    if (p.over) msgs.push('40銘柄までを使います');
+    hint.textContent = msgs.length ? msgs.join('。') + '。' : '';
+    layout = buildLayout(words, pattern, false);
+    render(animate);
+  }
+
+  function grow() {
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight + 2, 96) + 'px';
+  }
+
+  // 全角英数字は半角に、小文字は大文字にそろえる（変換中は触らず、確定した時点で直す）
+  function normalizeInput() {
+    var v = ta.value, pos = ta.selectionStart, n = v.normalize('NFKC').toUpperCase();
+    if (n === v) return;
+    var np = v.slice(0, pos).normalize('NFKC').toUpperCase().length;
+    ta.value = n;
+    try { ta.setSelectionRange(np, np); } catch (e) {}
+  }
+  function onType() {
+    normalizeInput(); grow();
+    clearTimeout(timer);
+    timer = setTimeout(function () { generate(true); }, 300);
+  }
+  ta.addEventListener('input', function (e) { if (!e.isComposing) onType(); });
+  ta.addEventListener('compositionend', onType);
+  $('shuffle').addEventListener('click', function () { pattern++; generate(true); });
+  document.querySelectorAll('input[name="look"], input[name="ov"]').forEach(function (el) {
+    el.addEventListener('change', function () { render(false); });
+  });
+  legend.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-i]');
+    if (!b) return;
+    var i = +b.getAttribute('data-i');
+    focus = (focus === i) ? null : i;
+    render(false);
+  });
+
+  /* 採点のしくみ */
+  var rulesBtn = $('rulesBtn'), dlg = $('rules');
+  function openRules() { if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', ''); }
+  function closeRules() { if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open'); }
+  rulesBtn.addEventListener('click', openRules);
+  $('rulesClose').addEventListener('click', closeRules);
+  dlg.addEventListener('click', function (e) { if (e.target === dlg) closeRules(); });
+
+  /* 撮影モード */
+  function ratioVal() {
+    var v = document.querySelector('input[name="ratio"]:checked').value;
+    return v === '1:1' ? 1 : v === '16:9' ? 16 / 9 : 9 / 16;
+  }
+  // パズルの枠は正方形（撮影モードでは選んだ比率）。画面に収まる大きさを計算して決める
+  var narrowMQ = window.matchMedia('(max-width: 760px)');
+  function fit() {
+    var shoot = document.body.classList.contains('shoot'), narrow = narrowMQ.matches;
+    var bw = board.clientWidth, bh = Math.max(board.clientHeight, narrow ? 300 : 420), ar = 1, sq, reserve = 0;
+    if (shoot) { ar = ratioVal(); reserve = shootbar.offsetHeight + 32; sq = Math.min(bw, (bh - reserve) * ar); }
+    else if (narrow) { sq = Math.min(bw, 620, bh - under.offsetHeight - 10 - 8 - rcol.offsetHeight); }
+    else { sq = Math.min(bh - under.offsetHeight - 12, bw - 16 - 240, 620); }
+    sq = Math.max(shoot ? 160 : 200, Math.floor(sq));
+    board.style.setProperty('--sq', sq + 'px');
+    board.style.setProperty('--ar', String(ar));
+    board.style.paddingBottom = shoot ? reserve + 'px' : '';
+    rcol.style.height = (!shoot && !narrow) ? lcol.offsetHeight + 'px' : '';
+  }
+  function setShoot(on) {
+    document.body.classList.toggle('shoot', on);
+    shootbar.hidden = !on;
+    if (dlg.open) closeRules();
+    if (on) { focus = null; render(false); }
+    fit();
+    if (on) $('shootClose').focus(); else $('shootBtn').focus();
+  }
+  /* 画像保存: 画面と同じ描画データをcanvasに描いてPNGにする（フォントは読み込み済みのNoto Sansを使う） */
+  var dl = null;
+  function themeColors() {
+    var cs = getComputedStyle(document.documentElement);
+    function v(n) { return cs.getPropertyValue(n).trim(); }
+    return { plate: v('--plate'), ink: v('--on-surface'), dim: v('--dim'), stage: v('--stage'), sb: v('--score-bg'), onsb: v('--on-score') };
+  }
+  /* ロゴ: ヘッダーと同じパスデータ（#cx-logo）をPath2Dで描く */
+  var LOGO = null;
+  function logoData() {
+    if (LOGO) return LOGO;
+    var sym = document.getElementById('cx-logo');
+    var vb = sym.getAttribute('viewBox').split(/\s+/).map(Number);
+    var ps = [].map.call(sym.querySelectorAll('path'), function (p) {
+      var tr = p.getAttribute('transform') || '', t = /translate\(\s*([-\d.]+)[ ,]+([-\d.]+)\s*\)/.exec(tr), sc = /scale\(\s*([-\d.]+)\s*\)/.exec(tr);
+      return { p: new Path2D(p.getAttribute('d')), f: p.getAttribute('fill'), x: t ? +t[1] : 0, y: t ? +t[2] : 0, s: sc ? +sc[1] : 1 };
+    });
+    return (LOGO = { vb: vb, ps: ps });
+  }
+  function drawLogo(ctx, cx, y, hgt) {
+    var L = logoData(), k = hgt / L.vb[3], w = L.vb[2] * k;
+    ctx.save(); ctx.translate(cx - w / 2, y); ctx.scale(k, k); ctx.translate(-L.vb[0], -L.vb[1]);
+    L.ps.forEach(function (q) { ctx.save(); ctx.translate(q.x, q.y); ctx.scale(q.s, q.s); ctx.fillStyle = q.f; ctx.fill(q.p); ctx.restore(); });
+    ctx.restore();
+  }
+  function roundRectPath(ctx, x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function drawOps(ctx, b, ox, oy, k, th) {
+    b.groups.forEach(function (g) {
+      g.items.forEach(function (it) {
+        ctx.save();
+        if (it.clip) {
+          ctx.beginPath();
+          b.clips[it.clip].forEach(function (q, i) { if (i) ctx.lineTo(ox + q[0] * k, oy + q[1] * k); else ctx.moveTo(ox + q[0] * k, oy + q[1] * k); });
+          ctx.closePath(); ctx.clip();
+        }
+        ctx.fillStyle = it.f === '@plate' ? th.plate : it.f === '@ink' ? th.ink : it.f === GREY ? th.dim : it.f;
+        if (it.k === 'rect') { roundRectPath(ctx, ox + it.x * k, oy + it.y * k, it.w * k, it.h * k, it.r * k); ctx.fill(); }
+        else {
+          ctx.font = it.w + ' ' + (it.fs * k) + 'px "Noto Sans","Noto Sans JP",sans-serif';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+          ctx.fillText(it.ch, ox + it.x * k, oy + it.y * k);
+        }
+        ctx.restore();
+      });
+    });
+  }
+  function makePng() {
+    var ar = ratioVal(), W = ar === 1 ? 1600 : ar > 1 ? 1920 : 1080, H = ar === 1 ? 1600 : ar > 1 ? 1080 : 1920;
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var ctx = cv.getContext('2d'), th = themeColors();
+    ctx.fillStyle = th.stage; ctx.fillRect(0, 0, W, H);
+    var unit = Math.min(W, H), m = unit * 0.04, has = layout.score100 !== null && showScore.checked, pillH = has ? unit * 0.085 : 0;
+    var logoH = unit * 0.09, gap = m * 0.6, mb = m * 1.6, ly = H - mb - logoH;
+    var aw = W - 2 * m, ah = H - m - mb - logoH - (has ? pillH + gap : 0) - m * 0.8;
+    // 盤面は文字の外周ぴったりで切り出す（画面用の余白 0.6マスは除く）
+    var b = buildOps(), pad = 0.6 * S, trim = pad - 0.05 * S, cw = b.VW - 2 * trim, chh = b.VH - 2 * trim;
+    var k = Math.min(aw / cw, ah / chh, unit * 0.2 / S);
+    drawOps(ctx, b, m + (aw - cw * k) / 2 - trim * k, m + (ah - chh * k) / 2 - trim * k, k, th);
+    if (has) {
+      var num = String(layout.score100);
+      var f1 = pillH * 0.66, f2 = pillH * 0.36, padX = pillH * 0.62, g1 = pillH * 0.08;
+      ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+      ctx.font = '900 ' + f1 + 'px "Noto Sans","Noto Sans JP",sans-serif'; var w1 = ctx.measureText(num).width;
+      ctx.font = '700 ' + f2 + 'px "Noto Sans JP","Noto Sans",sans-serif'; var w2 = ctx.measureText('点').width;
+      var pw = padX * 2 + w1 + g1 + w2, px = (W - pw) / 2, py = ly - gap - pillH, base = py + pillH / 2;
+      ctx.fillStyle = th.sb; roundRectPath(ctx, px, py, pw, pillH, pillH / 2); ctx.fill();
+      ctx.fillStyle = th.onsb;
+      var x = px + padX;
+      ctx.font = '900 ' + f1 + 'px "Noto Sans","Noto Sans JP",sans-serif'; ctx.fillText(num, x, base + f1 * 0.357); x += w1 + g1;
+      ctx.font = '700 ' + f2 + 'px "Noto Sans JP","Noto Sans",sans-serif'; ctx.fillText('点', x, base + f1 * 0.357);
+    }
+    drawLogo(ctx, W / 2, ly, logoH);
+    return new Promise(function (res) { cv.toBlob(res, 'image/png'); });
+  }
+  var saveBtn = $('saveBtn'), shootMsg = $('shootMsg'), msgTimer = null;
+  function say(t) { shootMsg.textContent = t; clearTimeout(msgTimer); if (t) msgTimer = setTimeout(function () { shootMsg.textContent = ''; }, 4000); }
+  saveBtn.addEventListener('click', function () {
+    if (!layout || !dl) return;
+    saveBtn.disabled = true;
+    var fontsReady = document.fonts ? Promise.all([document.fonts.load('900 64px "Noto Sans"'), document.fonts.load('800 64px "Noto Sans"'), document.fonts.load('700 32px "Noto Sans JP"', '点')]).catch(function () {}) : Promise.resolve();
+    fontsReady.then(makePng).then(function (blob) {
+      var rv = document.querySelector('input[name="ratio"]:checked').value.replace(':', 'x');
+      var d = new Date(), z = function (n) { return (n < 10 ? '0' : '') + n; };
+      var stamp = d.getFullYear() + z(d.getMonth() + 1) + z(d.getDate()) + '-' + z(d.getHours()) + z(d.getMinutes()) + z(d.getSeconds());
+      return dl.save({ filename: 'crosstick-' + stamp + '-' + rv + '.png', data: blob });
+    }).then(function () { say('保存しました'); }, function (e) {
+      if (e && e.code === 'declined') say(''); else say('画像を保存できませんでした');
+    }).then(function () { saveBtn.disabled = false; });
+  });
+  if (window.claude && typeof window.claude.use === 'function') {
+    window.claude.use('downloads').then(function (d) { dl = d; saveBtn.hidden = !d; fit(); }, function () {});
+  } else {
+    /* 通常のWebサイトとして開いたとき: 端末のダウンロードで保存する（外部へは送信しない） */
+    dl = {
+      save: function (r) {
+        var url = URL.createObjectURL(r.data), a = document.createElement('a');
+        a.href = url; a.download = r.filename; a.rel = 'noopener';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 20000);
+        return Promise.resolve({ status: 'saved' });
+      }
+    };
+    saveBtn.hidden = false; fit();
+  }
+  var showScore = $('showScore');
+  showScore.addEventListener('change', function () { document.body.classList.toggle('score-on', showScore.checked); fit(); });
+  $('shootBtn').addEventListener('click', function () { setShoot(true); });
+  $('shootClose').addEventListener('click', function () { setShoot(false); });
+  document.querySelectorAll('input[name="ratio"]').forEach(function (el) { el.addEventListener('change', fit); });
+  window.addEventListener('resize', fit);
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(board);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (dlg.open) return;
+    if (document.body.classList.contains('shoot')) setShoot(false);
+  });
+
+  ta.value = DEFAULT;
+  grow();
+  generate(false);
+})();
+</script>
+
+</body>
+</html>
