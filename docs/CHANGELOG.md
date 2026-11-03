@@ -36,3 +36,4 @@
 - ティッカー一覧を Vietstock の1,519件に更新。
 - セキュリティ強化: CSP から `'unsafe-inline'` を除去しインラインの script/style を SHA-256 ハッシュで許可（ビルドが `_headers` を生成）。`style` 属性を廃止（CSSOM へ）。COOP/CORP/HSTS 追加、`security.txt`・`robots.txt` 追加、`npm run test:csp`（本番と同じヘッダーで実ブラウザ検査）。
 - アクセス解析: Cloudflare Web Analytics（Pages の自動挿入）を導入。CSP に cloudflareinsights を許可、プライバシーポリシー（改定日 2026年11月4日）・アプリ内の説明（ja/vi/en）・外部送信の公表表を更新。
+- 書き出し画像にマスコット（ヘビ）を**左下**に入れるON/OFFスイッチを追加（既定OFF、3言語対応）。`main` にだけ入っていた機能を取り込み、位置を右下から左下に変更。元SVGは `assets/mascot-snake.svg`、組み込みは `src/partials/mascot-symbol.html`。

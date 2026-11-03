@@ -21,7 +21,7 @@ npm run test:e2e     # 画面チェック（要 Python + Playwright。CHROME=Chr
 | 画面の動き・画像書き出し | `src/app.js` |
 | 配置アルゴリズム・採点・色の割り当て | `src/core.js`（画面に依存しない。`tests/core.test.mjs` で検証） |
 | ティッカー一覧の更新 | `src/data/vn-tickers.txt`（手順: `docs/DATA.md`） |
-| ロゴ | `src/partials/logo-symbol.html`（元SVGは `assets/logo/`） |
+| ロゴ・マスコット | `src/partials/logo-symbol.html` / `mascot-symbol.html`（元SVGは `assets/`） |
 | サイトURL・タイトル・説明文（OGP。ベトナム語・英語の分は `i18n`） | `site.config.json` |
 | ファビコン・OGP画像・セキュリティヘッダ | `public/` |
 

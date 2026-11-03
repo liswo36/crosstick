@@ -309,12 +309,14 @@ dialog.dlg::backdrop { background: rgba(10, 24, 36, 0.5); }
 body.shoot header, body.shoot .dock, body.shoot .under, body.shoot .rcol { display: none; }
 body.shoot .board { grid-row: 1 / 4; max-width: none; align-items: center; justify-content: center; }
 body.shoot .lcol { width: auto; }
-.frame-logo { display: none; }
+.frame-logo, .frame-mascot { display: none; }
 body.shoot .frame-logo { display: block; position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); height: 52px; width: calc(52px * 3.925); pointer-events: none; }
 body.shoot .stage { inset: 16px 16px 152px; }
 body.shoot .badge { left: 50%; top: auto; bottom: 84px; transform: translateX(-50%); }
 body.shoot:not(.score-on) .badge { display: none; }
 body.shoot:not(.score-on) .stage { inset: 16px 16px 90px; }
+body.shoot.mascot-on .frame-mascot { display: block; position: absolute; left: 16px; bottom: 22px; height: 81px; width: calc(81px * 0.929); pointer-events: none; }
+body.shoot.mascot-on:not(.score-on) .stage { inset: 16px 16px 122px; }
 /* 点数のON/OFFスイッチ（M3 スイッチ） */
 .tog { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 6px; cursor: pointer; font-size: 1.0625rem; font-weight: 700; color: var(--on-surface); white-space: nowrap; }
 .tog input { position: absolute; opacity: 0; width: 1px; height: 1px; }
@@ -341,9 +343,11 @@ body.shoot:not(.score-on) .stage { inset: 16px 16px 90px; }
   .badge { left: 10px; top: 10px; padding: 4px 14px 4px 12px; }
   .sc-num { font-size: 1.875rem; }
   body.shoot .frame-logo { height: 40px; width: calc(40px * 3.925); bottom: 18px; }
+  body.shoot.mascot-on .frame-mascot { height: 62px; width: calc(62px * 0.929); left: 12px; bottom: 18px; }
   body.shoot .badge { bottom: 64px; }
   body.shoot .stage { inset: 12px 12px 118px; }
   body.shoot:not(.score-on) .stage { inset: 12px 12px 70px; }
+  body.shoot.mascot-on:not(.score-on) .stage { inset: 12px 12px 94px; }
   .shootbar .tog { flex: 1 1 100%; justify-content: center; }
   .dock { border-radius: 28px; padding: 10px 12px; gap: 8px 10px; }
   .dock textarea { flex: 1 1 100%; }

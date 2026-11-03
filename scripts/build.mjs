@@ -24,7 +24,8 @@ const core = read('src/core.js');          // 配置・採点のエンジン（�
 const i18n = read('src/i18n.js');          // 画面の文言（日本語・ベトナム語・英語）
 let app = read('src/app.js');              // 画面の処理
 const logoSymbol = read('src/partials/logo-symbol.html');
-let body = read('src/body.html').replace('<!--@LOGO_SYMBOL@-->', logoSymbol);
+const mascotSymbol = read('src/partials/mascot-symbol.html');
+let body = read('src/body.html').replace('<!--@LOGO_SYMBOL@-->', logoSymbol).replace('<!--@MASCOT_SYMBOL@-->', mascotSymbol);
 const headArtifact = read('src/head.artifact.html');
 
 /* ---------- ベトナム株ティッカー一覧を app.js に埋め込む ---------- */
